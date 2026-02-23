@@ -1,6 +1,11 @@
 {
   "$schema": "https://mintlify.com/schema.json",
   "name": "aephylia",
+  "favicon": "/favicon.png",
+  "logo": {
+    "dark": "/logo.png",
+    "light": "/logo.png"
+  },
   "colors": {
     "primary": "#5970B3",
     "light": "#8B9FD9",
