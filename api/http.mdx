@@ -1,0 +1,69 @@
+---
+title: HTTP
+description: "HTTP GET and POST requests"
+icon: "globe"
+---
+
+## Functions
+
+<ResponseField name="HttpGet(url)" type="string">
+  Performs an HTTP GET request and returns the response body as a string. Supports HTTPS. Raises a Lua error on failure.
+
+  <ParamField path="url" type="string" required>The URL to fetch</ParamField>
+
+  ```lua
+  local body = HttpGet("https://httpbin.org/get")
+  print(body)
+  ```
+</ResponseField>
+
+<ResponseField name="HttpPost(url, body, contentType)" type="string | nil">
+  Performs an HTTP POST request. Returns the response body, or `nil` on failure.
+
+  <ParamField path="url" type="string" required>The URL to post to</ParamField>
+  <ParamField path="body" type="string" required>Request body</ParamField>
+  <ParamField path="contentType" type="string" default="application/json">Content-Type header</ParamField>
+
+  ```lua
+  local payload = JSONEncode({ event = "script_loaded", time = os.time() })
+  local response = HttpPost("https://example.com/api/log", payload)
+  if response then
+      print("Logged:", response)
+  end
+  ```
+</ResponseField>
+
+---
+
+## Examples
+
+### Load a Remote Script
+
+```lua
+local code = HttpGet("https://raw.githubusercontent.com/user/repo/main/script.lua")
+local fn, err = loadstring(code)
+if fn then
+    fn()
+else
+    notify("Failed to load: " .. err, "Script", 5, 2)
+end
+```
+
+### Fetch JSON Data
+
+```lua
+local raw = HttpGet("https://api.example.com/data.json")
+local data = JSONDecode(raw)
+print("Server says:", data.message)
+```
+
+### Webhook Logging
+
+```lua
+local function webhook(url, content)
+    local payload = JSONEncode({ content = content })
+    HttpPost(url, payload, "application/json")
+end
+
+webhook("https://discord.com/api/webhooks/...", "Script started at " .. os.date())
+```

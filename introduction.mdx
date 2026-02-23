@@ -1,0 +1,56 @@
+---
+title: Introduction
+description: "Lua scripting engine for aephylia"
+---
+
+<Note>
+  **Security:** `os`, `io`, `package`, `debug`, `dofile`, `loadfile`, `load`, and `loadstring` are all stripped after initialization. Scripts run in a sandboxed environment.
+</Note>
+
+## What is the aephylia Lua API?
+
+aephylia embeds a full **Lua 5.4** runtime that lets you write custom scripts to automate features, create overlays, react to game events, and build entirely new functionality on top of the engine.
+
+Scripts run in **background threads** with their own isolated state. Each script can be started, stopped, and edited independently from the built-in script editor.
+
+## Feature overview
+
+<CardGroup cols={2}>
+  <Card title="Combat" icon="crosshairs" href="/api/aimbot">
+    Control aimbot, silent aim, and desync settings programmatically
+  </Card>
+  <Card title="Visuals" icon="eye" href="/api/esp">
+    Toggle ESP, set colors, add custom player flags, and control world rendering
+  </Card>
+  <Card title="Movement" icon="plane" href="/api/movement">
+    Enable flight, noclip, and set movement speeds
+  </Card>
+  <Card title="Drawing" icon="pen" href="/api/drawing">
+    Create persistent drawing objects — lines, circles, text, and more
+  </Card>
+  <Card title="Player Info" icon="users" href="/api/player">
+    Query all players, distances, health, velocity, and manage friendly lists
+  </Card>
+  <Card title="Game World" icon="globe" href="/api/game">
+    Search instances, get positions, world-to-screen projection, game metadata
+  </Card>
+  <Card title="Utilities" icon="wrench" href="/api/utilities">
+    JSON, base64, clipboard, notifications, and more
+  </Card>
+  <Card title="File System" icon="folder" href="/api/filesystem">
+    Sandboxed read/write to `Documents\aephylia\workspace`
+  </Card>
+</CardGroup>
+
+## Quick example
+
+```lua
+-- Toggle ESP with F2, show a notification
+while true do
+    if Input.IsKeyPressed(0x71) then
+        local state = ESP.Toggle()
+        notify(state and "ON" or "OFF", "ESP", 1.5, state and 1 or 2)
+    end
+    wait(0.01)
+end
+```

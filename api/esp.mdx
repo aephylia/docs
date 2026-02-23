@@ -1,0 +1,189 @@
+---
+title: ESP
+description: "Control ESP rendering, colors, flags, and world visual settings"
+icon: "eye"
+---
+
+## Toggle
+
+<ResponseField name="ESP.Enable()" type="void">
+  Enable ESP rendering.
+</ResponseField>
+
+<ResponseField name="ESP.Disable()" type="void">
+  Disable ESP rendering.
+</ResponseField>
+
+<ResponseField name="ESP.Toggle()" type="boolean">
+  Toggle ESP on/off. Returns the new state.
+</ResponseField>
+
+<ResponseField name="ESP.IsEnabled()" type="boolean">
+  Returns whether ESP is currently enabled.
+</ResponseField>
+
+## Display elements
+
+<ResponseField name="ESP.SetBoxes(enabled)" type="void">
+  Toggle bounding boxes around players.
+  <ParamField path="enabled" type="boolean" required />
+</ResponseField>
+
+<ResponseField name="ESP.SetNames(enabled)" type="void">
+  Toggle player name labels.
+  <ParamField path="enabled" type="boolean" required />
+</ResponseField>
+
+<ResponseField name="ESP.SetHealth(enabled)" type="void">
+  Toggle health bars.
+  <ParamField path="enabled" type="boolean" required />
+</ResponseField>
+
+<ResponseField name="ESP.SetDistance(enabled)" type="void">
+  Toggle distance labels.
+  <ParamField path="enabled" type="boolean" required />
+</ResponseField>
+
+<ResponseField name="ESP.SetSkeleton(enabled)" type="void">
+  Toggle skeleton rendering.
+  <ParamField path="enabled" type="boolean" required />
+</ResponseField>
+
+<ResponseField name="ESP.SetFlags(enabled)" type="void">
+  Toggle custom flag rendering.
+  <ParamField path="enabled" type="boolean" required />
+</ResponseField>
+
+## Styles
+
+<ResponseField name="ESP.SetBoxStyle(style)" type="void">
+  Set the box rendering style.
+  <ParamField path="style" type="number" required>
+    `0` = corners, `1` = full, etc.
+  </ParamField>
+</ResponseField>
+
+<ResponseField name="ESP.SetBoxFill(enabled)" type="void">
+  Toggle filled box backgrounds.
+  <ParamField path="enabled" type="boolean" required />
+</ResponseField>
+
+<ResponseField name="ESP.SetChams(enabled)" type="void">
+  Toggle chams (colored player models).
+  <ParamField path="enabled" type="boolean" required />
+</ResponseField>
+
+## Tracers
+
+<ResponseField name="ESP.SetTracers(enabled, mode)" type="void">
+  Toggle tracer lines to players.
+  <ParamField path="enabled" type="boolean" required />
+  <ParamField path="mode" type="number" required>
+    `0` = bottom, `1` = center, `2` = top
+  </ParamField>
+</ResponseField>
+
+## Render distance
+
+<ResponseField name="ESP.SetRenderDistance(distance)" type="void">
+  Set the maximum distance at which ESP elements render.
+  <ParamField path="distance" type="number" required>
+    Distance in studs (e.g. `500`)
+  </ParamField>
+</ResponseField>
+
+## Colors
+
+<ResponseField name="ESP.SetColor(type, r, g, b)" type="void">
+  Set colors for specific ESP elements.
+  <ParamField path="type" type="string" required>
+    `"enemy"`, `"skeleton"`, or `"name"`
+  </ParamField>
+  <ParamField path="r" type="number" required>Red (0–255)</ParamField>
+  <ParamField path="g" type="number" required>Green (0–255)</ParamField>
+  <ParamField path="b" type="number" required>Blue (0–255)</ParamField>
+</ResponseField>
+
+```lua
+ESP.SetColor("enemy", 255, 50, 50)    -- red boxes
+ESP.SetColor("skeleton", 255, 255, 0) -- yellow skeleton
+ESP.SetColor("name", 255, 255, 255)   -- white names
+```
+
+## Team check
+
+<ResponseField name="ESP.SetTeamCheck(enabled)" type="void">
+  Enable or disable team checking (hide teammates from ESP).
+  <ParamField path="enabled" type="boolean" required />
+</ResponseField>
+
+## Advanced features
+
+<ResponseField name="ESP.SetOffscreenESP(enabled)" type="void">
+  Show indicators for off-screen players.
+  <ParamField path="enabled" type="boolean" required />
+</ResponseField>
+
+<ResponseField name="ESP.SetLockedHighlight(enabled)" type="void">
+  Highlight the player currently locked by aimbot.
+  <ParamField path="enabled" type="boolean" required />
+</ResponseField>
+
+## World rendering
+
+<ResponseField name="ESP.SetWorldFOV(enabled, value)" type="void">
+  Override the camera field of view.
+  <ParamField path="enabled" type="boolean" required />
+  <ParamField path="value" type="number" required>FOV in degrees (e.g. `90`)</ParamField>
+</ResponseField>
+
+<ResponseField name="ESP.SetFog(enabled, start, end)" type="void">
+  Override fog settings.
+  <ParamField path="enabled" type="boolean" required />
+  <ParamField path="start" type="number" required>Fog start distance</ParamField>
+  <ParamField path="end" type="number" required>Fog end distance</ParamField>
+</ResponseField>
+
+<ResponseField name="ESP.SetExposure(enabled, value)" type="void">
+  Override exposure/brightness.
+  <ParamField path="enabled" type="boolean" required />
+  <ParamField path="value" type="number" required>Exposure value (e.g. `0.5`)</ParamField>
+</ResponseField>
+
+## Custom flags
+
+Add custom text flags that appear next to player names in ESP.
+
+<ResponseField name="ESP.SetFlag(playerName, flagText, r, g, b)" type="void">
+  Add a custom flag to a player.
+  <ParamField path="playerName" type="string" required>Player's username</ParamField>
+  <ParamField path="flagText" type="string" required>Flag text to display</ParamField>
+  <ParamField path="r" type="number" required>Red (0–255)</ParamField>
+  <ParamField path="g" type="number" required>Green (0–255)</ParamField>
+  <ParamField path="b" type="number" required>Blue (0–255)</ParamField>
+</ResponseField>
+
+<ResponseField name="ESP.RemoveFlag(playerName, flagText)" type="void">
+  Remove a specific flag from a player.
+</ResponseField>
+
+<ResponseField name="ESP.ClearFlags(playerName)" type="void">
+  Remove all flags from a specific player.
+</ResponseField>
+
+<ResponseField name="ESP.ClearAllFlags()" type="void">
+  Remove all custom flags from all players.
+</ResponseField>
+
+```lua
+-- Mark a suspicious player
+ESP.SetFlag("PlayerName", "SUS", 255, 165, 0)
+
+-- Mark high-value targets
+local players = Player.GetPlayers()
+for _, p in ipairs(players) do
+    if p.Health > 90 then
+        ESP.SetFlag(p.Name, "FULL HP", 0, 255, 0)
+    end
+end
+```

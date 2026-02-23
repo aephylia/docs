@@ -1,0 +1,97 @@
+---
+title: Silent Aim & Combat
+description: "Silent aim, desync, and tickrate control"
+icon: "bullseye"
+---
+
+## Silent Aim
+
+Silent aim modifies the viewport sent to the server so your shots hit the target without visibly aiming at them.
+
+<ResponseField name="Silent.Enable()" type="void">
+  Enable silent aim.
+</ResponseField>
+
+<ResponseField name="Silent.Disable()" type="void">
+  Disable silent aim.
+</ResponseField>
+
+<ResponseField name="Silent.Toggle()" type="boolean">
+  Toggle silent aim. Returns the new state.
+</ResponseField>
+
+<ResponseField name="Silent.IsEnabled()" type="boolean">
+  Returns whether silent aim is enabled.
+</ResponseField>
+
+<ResponseField name="Silent.SetFOV(value)" type="void">
+  Set the silent aim FOV radius.
+  <ParamField path="value" type="number" required>
+    FOV radius in pixels (e.g. `200`)
+  </ParamField>
+</ResponseField>
+
+<ResponseField name="Silent.GetFOV()" type="number">
+  Returns the current silent aim FOV radius.
+</ResponseField>
+
+---
+
+## Desync
+
+Desync desyncs your character's position on the server from what other players see, making you harder to hit.
+
+<ResponseField name="Desync.Enable()" type="void">
+  Enable desync.
+</ResponseField>
+
+<ResponseField name="Desync.Disable()" type="void">
+  Disable desync.
+</ResponseField>
+
+<ResponseField name="Desync.Toggle()" type="boolean">
+  Toggle desync. Returns the new state.
+</ResponseField>
+
+<ResponseField name="Desync.IsEnabled()" type="boolean">
+  Returns whether desync is enabled.
+</ResponseField>
+
+---
+
+## Tickrate
+
+Override the game's physics simulation tick rate for faster movement and actions.
+
+<ResponseField name="Tickrate.Enable()" type="void">
+  Enable tickrate override.
+</ResponseField>
+
+<ResponseField name="Tickrate.Disable()" type="void">
+  Disable tickrate override.
+</ResponseField>
+
+<ResponseField name="Tickrate.Set(value)" type="void">
+  Set the tickrate value and enable it.
+  <ParamField path="value" type="number" required>
+    Ticks per second (e.g. `240`). Default Roblox is `60`.
+  </ParamField>
+</ResponseField>
+
+<ResponseField name="Tickrate.Get()" type="number">
+  Returns the current tickrate value.
+</ResponseField>
+
+<ResponseField name="Tickrate.IsEnabled()" type="boolean">
+  Returns whether tickrate override is enabled.
+</ResponseField>
+
+```lua
+-- Enable combat setup
+Silent.Enable()
+Silent.SetFOV(200)
+Desync.Enable()
+Tickrate.Set(240)
+
+notify("Combat mode ON", "Script", 2, 1)
+```

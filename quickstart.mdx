@@ -1,0 +1,60 @@
+---
+title: Quickstart
+description: "Write and run your first aephylia script"
+---
+
+## Opening the script editor
+
+Press the **Script Editor** button in the dock bar (or toggle it from the Settings tab) to open the built-in editor with syntax highlighting, tabs, and a console.
+
+## Your first script
+
+```lua
+-- Hello world
+print("Hello from aephylia!")
+notify("Script loaded!", "aephylia", 3)
+```
+
+## Script lifecycle
+
+<Steps>
+  <Step title="Create">
+    Click **+** in the script editor to create a new script, or load one from disk.
+  </Step>
+  <Step title="Edit">
+    Write your Lua code in the editor. Syntax highlighting and auto-indentation are built in.
+  </Step>
+  <Step title="Run">
+    Click the **▶ Run** button. The script executes in a background thread with its own Lua state.
+  </Step>
+  <Step title="Stop">
+    Click **■ Stop** to request the script to halt. The engine checks a stop flag every 100 instructions.
+  </Step>
+</Steps>
+
+## Script storage
+
+Scripts are saved to `Documents\aephylia\scripts\*.lua` and persist between sessions.
+
+## Key concepts
+
+<AccordionGroup>
+  <Accordion title="Background execution">
+    Each script runs in its own thread with a fresh `lua_State`. Scripts don't block each other or the main render loop.
+  </Accordion>
+  <Accordion title="wait() is required in loops">
+    Always include `wait()` in `while true` loops. Without it, the script will consume 100% of a CPU core and can't be stopped.
+    ```lua
+    while true do
+        -- your logic
+        wait(0.01) -- 10ms, always include this
+    end
+    ```
+  </Accordion>
+  <Accordion title="Thread safety">
+    API calls that modify shared state (vars, draw buffers, notifications) are protected by mutexes. You don't need to worry about locking.
+  </Accordion>
+  <Accordion title="Sandboxing">
+    File I/O is restricted to `Documents\aephylia\workspace`. Dangerous Lua standard library functions are removed.
+  </Accordion>
+</AccordionGroup>

@@ -1,0 +1,223 @@
+---
+title: Drawing (OOP)
+description: "Persistent object-oriented drawing API"
+icon: "pen-nib"
+---
+
+The OOP Drawing API creates **persistent** drawing objects that stay on screen until explicitly removed. This matches the Roblox exploit executor drawing API style.
+
+## Creating Objects
+
+<ResponseField name="Drawing.new(type)" type="DrawingObject">
+  Creates a new persistent drawing object.
+
+  <ParamField path="type" type="string" required>
+    One of: `"Line"`, `"Circle"`, `"Square"`, `"Text"`, `"Triangle"`, `"Quad"`
+  </ParamField>
+
+  ```lua
+  local line = Drawing.new("Line")
+  line.From = Vector2.new(100, 100)
+  line.To = Vector2.new(400, 400)
+  line.Color = Color3.fromRGB(255, 0, 0)
+  line.Thickness = 2
+  line.Visible = true
+  ```
+</ResponseField>
+
+<ResponseField name="Drawing.clear()" type="void">
+  Removes **all** persistent drawing objects at once.
+</ResponseField>
+
+---
+
+## Shared Properties
+
+All drawing objects support the following properties:
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `Visible` | boolean | `false` | Whether the object is drawn |
+| `Color` | Color3 | `{0, 0, 0}` | Stroke / fill color |
+| `Transparency` | number | `1.0` | Opacity (0 = invisible, 1 = opaque) |
+| `ZIndex` | number | `0` | Draw order (higher = on top) |
+| `Thickness` | number | `1.0` | Line thickness |
+| `Filled` | boolean | `false` | Whether to fill the shape |
+
+---
+
+## Methods
+
+Every drawing object has the following methods:
+
+<ResponseField name="object:Remove()" type="void">
+  Destroys the drawing object.
+</ResponseField>
+
+<ResponseField name="object:Destroy()" type="void">
+  Alias for `Remove()`.
+</ResponseField>
+
+---
+
+## Line
+
+```lua
+local line = Drawing.new("Line")
+line.From = Vector2.new(0, 0)
+line.To = Vector2.new(500, 500)
+line.Color = Color3.fromRGB(255, 255, 0)
+line.Thickness = 2
+line.Visible = true
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `From` | Vector2 | Start point |
+| `To` | Vector2 | End point |
+
+---
+
+## Circle
+
+```lua
+local circle = Drawing.new("Circle")
+circle.Position = Vector2.new(400, 300)
+circle.Radius = 50
+circle.Color = Color3.fromRGB(0, 255, 0)
+circle.NumSides = 64
+circle.Filled = false
+circle.Visible = true
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `Position` | Vector2 | Center point |
+| `Radius` | number | Circle radius |
+| `NumSides` | number | Segment count (more = smoother) |
+
+---
+
+## Square
+
+```lua
+local box = Drawing.new("Square")
+box.Position = Vector2.new(100, 100)
+box.Size = Vector2.new(200, 150)
+box.Color = Color3.fromRGB(0, 120, 255)
+box.Filled = true
+box.Visible = true
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `Position` | Vector2 | Top-left corner |
+| `Size` | Vector2 | Width and height |
+
+---
+
+## Text
+
+```lua
+local text = Drawing.new("Text")
+text.Position = Vector2.new(200, 50)
+text.Text = "Hello aephylia!"
+text.Size = 18
+text.Color = Color3.fromRGB(255, 255, 255)
+text.Center = true
+text.Outline = true
+text.OutlineColor = Color3.fromRGB(0, 0, 0)
+text.Visible = true
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `Position` | Vector2 | Text position |
+| `Text` | string | The text content |
+| `Size` | number | Font size |
+| `Center` | boolean | Center-align horizontally |
+| `Outline` | boolean | Draw text outline/shadow |
+| `OutlineColor` | Color3 | Outline color |
+| `Font` | string | Font name |
+
+---
+
+## Triangle
+
+```lua
+local tri = Drawing.new("Triangle")
+tri.PointA = Vector2.new(300, 100)
+tri.PointB = Vector2.new(200, 300)
+tri.PointC = Vector2.new(400, 300)
+tri.Color = Color3.fromRGB(255, 128, 0)
+tri.Filled = true
+tri.Visible = true
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `PointA` | Vector2 | First vertex |
+| `PointB` | Vector2 | Second vertex |
+| `PointC` | Vector2 | Third vertex |
+
+---
+
+## Quad
+
+```lua
+local quad = Drawing.new("Quad")
+quad.PointA = Vector2.new(100, 100)
+quad.PointB = Vector2.new(300, 100)
+quad.PointC = Vector2.new(350, 300)
+quad.PointD = Vector2.new(50, 300)
+quad.Color = Color3.fromRGB(128, 0, 255)
+quad.Filled = true
+quad.Visible = true
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `PointA` | Vector2 | First vertex |
+| `PointB` | Vector2 | Second vertex |
+| `PointC` | Vector2 | Third vertex |
+| `PointD` | Vector2 | Fourth vertex |
+
+---
+
+## Full Example — Animated Crosshair
+
+```lua
+local size = Game.GetScreenSize()
+local cx, cy = size.Width / 2, size.Height / 2
+
+local lines = {}
+local offsets = {
+    { -10, 0, -3, 0 }, -- left
+    { 3, 0, 10, 0 },   -- right
+    { 0, -10, 0, -3 }, -- top
+    { 0, 3, 0, 10 },   -- bottom
+}
+
+for _, o in ipairs(offsets) do
+    local l = Drawing.new("Line")
+    l.From = Vector2.new(cx + o[1], cy + o[2])
+    l.To = Vector2.new(cx + o[3], cy + o[4])
+    l.Color = Color3.fromRGB(0, 255, 0)
+    l.Thickness = 2
+    l.Visible = true
+    table.insert(lines, l)
+end
+
+-- Dot in center
+local dot = Drawing.new("Circle")
+dot.Position = Vector2.new(cx, cy)
+dot.Radius = 2
+dot.Color = Color3.fromRGB(0, 255, 0)
+dot.Filled = true
+dot.Visible = true
+```
+
+<Note>
+  OOP drawings persist across frames — you don't need to recreate them in a loop.
+  Call `:Remove()` when you're done with an object to free resources.
+</Note>

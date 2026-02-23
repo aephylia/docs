@@ -1,0 +1,85 @@
+---
+title: Movement
+description: "Flight and noclip controls"
+icon: "person-running"
+---
+
+## Flight
+
+Enables free flight, overriding Roblox gravity and allowing movement in any direction.
+
+<ResponseField name="Flight.Enable()" type="void">
+  Enable flight.
+</ResponseField>
+
+<ResponseField name="Flight.Disable()" type="void">
+  Disable flight.
+</ResponseField>
+
+<ResponseField name="Flight.Toggle()" type="boolean">
+  Toggle flight. Returns the new state.
+</ResponseField>
+
+<ResponseField name="Flight.IsEnabled()" type="boolean">
+  Returns whether flight is enabled.
+</ResponseField>
+
+<ResponseField name="Flight.SetSpeed(speed)" type="void">
+  Set flight speed.
+  <ParamField path="speed" type="number" required>
+    The flight speed value.
+  </ParamField>
+</ResponseField>
+
+<ResponseField name="Flight.GetSpeed()" type="number">
+  Returns the current flight speed.
+</ResponseField>
+
+```lua
+-- Toggle flight with a keybind
+while true do
+    if Input.IsKeyPressed(0x76) then -- F7
+        local on = Flight.Toggle()
+        if on then
+            Flight.SetSpeed(100)
+            notify("Flight ON", "Movement", 2, 1)
+        else
+            notify("Flight OFF", "Movement", 2, 2)
+        end
+    end
+    wait(0.01)
+end
+```
+
+---
+
+## Noclip
+
+Walk through walls and terrain by disabling collision checks.
+
+<ResponseField name="Noclip.Enable()" type="void">
+  Enable noclip.
+</ResponseField>
+
+<ResponseField name="Noclip.Disable()" type="void">
+  Disable noclip.
+</ResponseField>
+
+<ResponseField name="Noclip.Toggle()" type="boolean">
+  Toggle noclip. Returns the new state.
+</ResponseField>
+
+<ResponseField name="Noclip.IsEnabled()" type="boolean">
+  Returns whether noclip is enabled.
+</ResponseField>
+
+```lua
+-- Simple noclip toggle
+while true do
+    if Input.IsKeyPressed(0x77) then -- F8
+        local on = Noclip.Toggle()
+        notify(on and "Noclip ON" or "Noclip OFF", "Movement", 2, on and 1 or 2)
+    end
+    wait(0.01)
+end
+```

@@ -1,0 +1,37 @@
+---
+title: Security
+description: "Sandboxing and security model for Lua scripts"
+---
+
+## Removed globals
+
+The following Lua standard library functions are **stripped** after initialization and cannot be used in scripts:
+
+| Function | Reason |
+|---|---|
+| `os` | System access (execute commands, env vars, etc.) |
+| `io` | Unrestricted file I/O |
+| `package` | Module loading from arbitrary paths |
+| `debug` | Inspect/modify runtime internals |
+| `dofile` | Execute arbitrary files |
+| `loadfile` | Load arbitrary files as code |
+| `load` | Load arbitrary strings as bytecode |
+| `loadstring` | Load arbitrary strings as code |
+
+## File system sandboxing
+
+All file operations (`readfile`, `writefile`, etc.) are restricted to:
+
+```
+Documents\aephylia\workspace\
+```
+
+Path traversal attempts (e.g. `../`) are blocked. Absolute paths are rejected.
+
+## Script isolation
+
+Each script runs in its own `lua_State` on a separate thread. Scripts cannot access each other's state or variables.
+
+## Abort mechanism
+
+The engine installs a debug hook that checks a stop flag every **100 Lua instructions**. When you click Stop, the script will halt within milliseconds regardless of what it's doing.

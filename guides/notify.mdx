@@ -1,0 +1,123 @@
+---
+title: Notifications
+description: "How to use the notification system"
+icon: "bell"
+---
+
+aephylia has a built-in animated notification system. Notifications slide in from the right with a smooth animation, show a progress bar countdown, and support multiple types with color coding.
+
+## Basic Usage
+
+```lua
+notify("Hello from my script!", "My Script", 3, 0)
+```
+
+<ParamField path="message" type="string" required>
+  The notification body text.
+</ParamField>
+
+<ParamField path="title" type="string" default="aephylia">
+  The header text shown in bold.
+</ParamField>
+
+<ParamField path="duration" type="number" default="5.0">
+  How long the notification stays visible (seconds).
+</ParamField>
+
+<ParamField path="type" type="number" default="0">
+  Controls the accent color bar on the left side of the notification.
+</ParamField>
+
+---
+
+## Notification Types
+
+| Type | Code | Color | Use Case |
+|------|------|-------|----------|
+| Info | `0` | Accent color | General information |
+| Success | `1` | Green | Confirmations, toggles ON |
+| Error | `2` | Red | Failures, toggles OFF |
+| Warning | `3` | Amber | Cautions, low values |
+
+```lua
+-- Info - uses your configured accent color
+notify("Script started", "Info", 3, 0)
+
+-- Success - green accent bar
+notify("Aimbot enabled", "Combat", 2, 1)
+
+-- Error - red accent bar
+notify("Failed to load config", "Error", 5, 2)
+
+-- Warning - amber accent bar
+notify("Low health detected", "Warning", 4, 3)
+```
+
+---
+
+## Built-in Module Notifications
+
+When you toggle built-in modules using their API (e.g. `Aimbot.Toggle()`), aephylia automatically shows a notification. You don't need to call `notify()` separately:
+
+```lua
+-- These automatically show "Aimbot Enabled ✓" or "Aimbot Disabled ✗"
+Aimbot.Toggle()
+ESP.Toggle()
+Silent.Toggle()
+Flight.Toggle()
+Noclip.Toggle()
+Desync.Toggle()
+```
+
+---
+
+## Stacking
+
+Multiple notifications stack vertically. New notifications appear at the top and push existing ones down with a smooth animation.
+
+```lua
+notify("First notification", "Stack", 5, 0)
+wait(0.3)
+notify("Second notification", "Stack", 5, 1)
+wait(0.3)
+notify("Third notification", "Stack", 5, 2)
+```
+
+---
+
+## Practical Patterns
+
+### Script Startup
+
+```lua
+notify("BloxStrike BHop loaded", "BHop", 3, 1)
+notify("Press F4 to toggle", "BHop", 3, 0)
+```
+
+### Error Handling
+
+```lua
+local ok, err = pcall(function()
+    -- risky code here
+    local data = JSONDecode(readfile("config.json"))
+end)
+
+if not ok then
+    notify("Config error: " .. tostring(err), "Error", 5, 2)
+end
+```
+
+### State Changes
+
+```lua
+while true do
+    if Input.IsKeyPressed(0x74) then -- F5
+        local on = ESP.Toggle()
+        -- Module auto-notifies, but you can add custom ones:
+        if on then
+            notify("Distance: ON, Names: ON", "ESP Config", 2, 0)
+        end
+    end
+    wait(0.01)
+end
+```

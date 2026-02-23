@@ -1,0 +1,174 @@
+---
+title: Draw (Immediate)
+description: "Frame-by-frame immediate-mode drawing"
+icon: "paintbrush"
+---
+
+The `Draw` library provides immediate-mode rendering. Commands are **auto-cleared each frame** — call them inside a loop with `wait()` to persist visuals.
+
+<Note>
+  For persistent drawing objects that stay on screen, use the [Drawing (OOP)](/api/drawing) API instead.
+</Note>
+
+All color values are **0–255**. Default color is white (`255, 255, 255, 255`).
+
+---
+
+## Text
+
+<ResponseField name="Draw.Text(x, y, text, r, g, b, a, outline)" type="void">
+  Draws text at the given screen position.
+
+  <ParamField path="x" type="number" required>Screen X</ParamField>
+  <ParamField path="y" type="number" required>Screen Y</ParamField>
+  <ParamField path="text" type="string" required>Text to draw</ParamField>
+  <ParamField path="r" type="number" default="255">Red (0–255)</ParamField>
+  <ParamField path="g" type="number" default="255">Green (0–255)</ParamField>
+  <ParamField path="b" type="number" default="255">Blue (0–255)</ParamField>
+  <ParamField path="a" type="number" default="255">Alpha (0–255)</ParamField>
+  <ParamField path="outline" type="boolean" default="false">Draw black outline behind text</ParamField>
+
+  ```lua
+  Draw.Text(100, 100, "Hello!", 255, 255, 0, 255, true)
+  ```
+</ResponseField>
+
+---
+
+## Lines
+
+<ResponseField name="Draw.Line(x1, y1, x2, y2, r, g, b, a, thickness)" type="void">
+  Draws a line between two screen points.
+
+  <ParamField path="x1" type="number" required>Start X</ParamField>
+  <ParamField path="y1" type="number" required>Start Y</ParamField>
+  <ParamField path="x2" type="number" required>End X</ParamField>
+  <ParamField path="y2" type="number" required>End Y</ParamField>
+  <ParamField path="r" type="number" default="255">Red</ParamField>
+  <ParamField path="g" type="number" default="255">Green</ParamField>
+  <ParamField path="b" type="number" default="255">Blue</ParamField>
+  <ParamField path="a" type="number" default="255">Alpha</ParamField>
+  <ParamField path="thickness" type="number" default="1">Line thickness</ParamField>
+
+  ```lua
+  Draw.Line(0, 0, 500, 500, 255, 0, 0, 255, 2)
+  ```
+</ResponseField>
+
+---
+
+## Rectangles
+
+<ResponseField name="Draw.Box(x, y, w, h, r, g, b, a, thickness)" type="void">
+  Draws a rectangle **outline**.
+
+  <ParamField path="x" type="number" required>Top-left X</ParamField>
+  <ParamField path="y" type="number" required>Top-left Y</ParamField>
+  <ParamField path="w" type="number" required>Width</ParamField>
+  <ParamField path="h" type="number" required>Height</ParamField>
+  <ParamField path="r" type="number" default="255">Red</ParamField>
+  <ParamField path="g" type="number" default="255">Green</ParamField>
+  <ParamField path="b" type="number" default="255">Blue</ParamField>
+  <ParamField path="a" type="number" default="255">Alpha</ParamField>
+  <ParamField path="thickness" type="number" default="1">Line thickness</ParamField>
+</ResponseField>
+
+<ResponseField name="Draw.BoxFilled(x, y, w, h, r, g, b, a)" type="void">
+  Draws a **filled** rectangle.
+
+  <ParamField path="x" type="number" required>Top-left X</ParamField>
+  <ParamField path="y" type="number" required>Top-left Y</ParamField>
+  <ParamField path="w" type="number" required>Width</ParamField>
+  <ParamField path="h" type="number" required>Height</ParamField>
+  <ParamField path="r" type="number" default="255">Red</ParamField>
+  <ParamField path="g" type="number" default="255">Green</ParamField>
+  <ParamField path="b" type="number" default="255">Blue</ParamField>
+  <ParamField path="a" type="number" default="255">Alpha</ParamField>
+
+  ```lua
+  -- Semi-transparent background
+  Draw.BoxFilled(100, 100, 200, 50, 0, 0, 0, 128)
+  Draw.Text(110, 115, "Overlay Text", 255, 255, 255)
+  ```
+</ResponseField>
+
+---
+
+## Circles
+
+<ResponseField name="Draw.Circle(x, y, radius, r, g, b, a, thickness)" type="void">
+  Draws a circle **outline**.
+
+  <ParamField path="x" type="number" required>Center X</ParamField>
+  <ParamField path="y" type="number" required>Center Y</ParamField>
+  <ParamField path="radius" type="number" required>Radius</ParamField>
+  <ParamField path="r" type="number" default="255">Red</ParamField>
+  <ParamField path="g" type="number" default="255">Green</ParamField>
+  <ParamField path="b" type="number" default="255">Blue</ParamField>
+  <ParamField path="a" type="number" default="255">Alpha</ParamField>
+  <ParamField path="thickness" type="number" default="1">Line thickness</ParamField>
+</ResponseField>
+
+<ResponseField name="Draw.CircleFilled(x, y, radius, r, g, b, a)" type="void">
+  Draws a **filled** circle.
+
+  <ParamField path="x" type="number" required>Center X</ParamField>
+  <ParamField path="y" type="number" required>Center Y</ParamField>
+  <ParamField path="radius" type="number" required>Radius</ParamField>
+  <ParamField path="r" type="number" default="255">Red</ParamField>
+  <ParamField path="g" type="number" default="255">Green</ParamField>
+  <ParamField path="b" type="number" default="255">Blue</ParamField>
+  <ParamField path="a" type="number" default="255">Alpha</ParamField>
+</ResponseField>
+
+---
+
+## Triangles
+
+<ResponseField name="Draw.Triangle(x1, y1, x2, y2, x3, y3, r, g, b, a, thickness)" type="void">
+  Draws a triangle outline from three vertices.
+
+  <ParamField path="x1" type="number" required>Vertex 1 X</ParamField>
+  <ParamField path="y1" type="number" required>Vertex 1 Y</ParamField>
+  <ParamField path="x2" type="number" required>Vertex 2 X</ParamField>
+  <ParamField path="y2" type="number" required>Vertex 2 Y</ParamField>
+  <ParamField path="x3" type="number" required>Vertex 3 X</ParamField>
+  <ParamField path="y3" type="number" required>Vertex 3 Y</ParamField>
+  <ParamField path="r" type="number" default="255">Red</ParamField>
+  <ParamField path="g" type="number" default="255">Green</ParamField>
+  <ParamField path="b" type="number" default="255">Blue</ParamField>
+  <ParamField path="a" type="number" default="255">Alpha</ParamField>
+  <ParamField path="thickness" type="number" default="1">Line thickness</ParamField>
+</ResponseField>
+
+---
+
+## Clear
+
+<ResponseField name="Draw.Clear()" type="void">
+  Swaps the back draw buffer to the front and clears the back buffer. This is done automatically each frame, but you can call it manually to clear mid-frame.
+</ResponseField>
+
+---
+
+## Example — HUD Overlay
+
+```lua
+while true do
+    local size = Game.GetScreenSize()
+
+    -- Background bar
+    Draw.BoxFilled(10, 10, 200, 30, 0, 0, 0, 180)
+
+    -- Health text
+    local pos = Player.GetLocalPosition()
+    Draw.Text(15, 15, string.format("Pos: %.0f, %.0f, %.0f", pos.X, pos.Y, pos.Z), 0, 255, 0, 255, true)
+
+    -- Crosshair
+    local cx, cy = size.Width / 2, size.Height / 2
+    Draw.Line(cx - 10, cy, cx + 10, cy, 0, 255, 0, 255, 2)
+    Draw.Line(cx, cy - 10, cx, cy + 10, 0, 255, 0, 255, 2)
+
+    wait(0.001)
+end
+```

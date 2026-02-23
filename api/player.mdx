@@ -1,0 +1,138 @@
+---
+title: Player
+description: "Query local player and other players in the game"
+icon: "users"
+---
+
+## Local Player
+
+<ResponseField name="Player.GetLocalPosition()" type="table">
+  Returns the local player's world position.
+
+  ```lua
+  local pos = Player.GetLocalPosition()
+  print(pos.X, pos.Y, pos.Z)
+  ```
+
+  **Returns:** `{ X: number, Y: number, Z: number }`
+</ResponseField>
+
+---
+
+## Player List
+
+<ResponseField name="Player.GetPlayers()" type="table">
+  Returns an array of all cached players in the game.
+
+  Each player entry contains the following fields:
+
+  | Field | Type | Description |
+  |-------|------|-------------|
+  | `Name` | string | Username |
+  | `DisplayName` | string | Display name |
+  | `Health` | number | Current health |
+  | `MaxHealth` | number | Maximum health |
+  | `IsTeammate` | boolean | Whether on the same team |
+  | `Distance` | number | Distance from local player |
+  | `UserId` | number | Roblox user ID |
+  | `IsR6` | boolean | Whether using R6 rig |
+  | `IsAephyliaUser` | boolean | Whether this player uses aephylia |
+  | `Address` | number | Memory address (for advanced use) |
+  | `Position` | table | `{ X, Y, Z }` — root part position |
+  | `HeadPosition` | table | `{ X, Y, Z }` — head position |
+  | `Velocity` | table | `{ X, Y, Z }` — movement velocity |
+
+  ```lua
+  local players = Player.GetPlayers()
+  for _, p in ipairs(players) do
+      print(p.Name, p.Health .. "/" .. p.MaxHealth, math.floor(p.Distance) .. "m")
+  end
+  ```
+</ResponseField>
+
+<ResponseField name="Player.GetCount()" type="number">
+  Returns the number of cached players.
+</ResponseField>
+
+---
+
+## Lookup
+
+<ResponseField name="Player.GetClosest(skipTeammates)" type="table | nil">
+  Returns the closest player, or `nil` if none found.
+
+  <ParamField path="skipTeammates" type="boolean" default="false">
+    If `true`, teammates are excluded from the search.
+  </ParamField>
+
+  **Returns:** `{ Name, DisplayName, Health, MaxHealth, Distance, IsTeammate, Address, Position }` or `nil`
+
+  ```lua
+  local closest = Player.GetClosest(true) -- skip teammates
+  if closest then
+      print("Nearest enemy:", closest.Name, math.floor(closest.Distance) .. "m")
+  end
+  ```
+</ResponseField>
+
+<ResponseField name="Player.GetByName(name)" type="table | nil">
+  Find a player by username **or** display name (case-sensitive).
+
+  <ParamField path="name" type="string" required>
+    The username or display name to search for.
+  </ParamField>
+
+  **Returns:** `{ Name, DisplayName, Health, MaxHealth, Distance, IsTeammate, Address, UserId, Position }` or `nil`
+
+  ```lua
+  local target = Player.GetByName("xXGamerXx")
+  if target then
+      print("Found:", target.Name, "HP:", target.Health)
+  end
+  ```
+</ResponseField>
+
+---
+
+## Friend / Foe
+
+<ResponseField name="Player.SetFriendly(name)" type="boolean">
+  Mark a player as friendly (won't be targeted by aimbot).
+
+  <ParamField path="name" type="string" required>
+    The username of the player.
+  </ParamField>
+
+  Returns `true` if the player was found.
+</ResponseField>
+
+<ResponseField name="Player.SetNeutral(name)" type="boolean">
+  Remove the friendly marker from a player.
+
+  <ParamField path="name" type="string" required>
+    The username of the player.
+  </ParamField>
+
+  Returns `true` if the player was found.
+</ResponseField>
+
+<ResponseField name="Player.IsFriendly(name)" type="boolean">
+  Check if a player is marked as friendly. Returns `false` if the player is not found.
+
+  <ParamField path="name" type="string" required>
+    The username of the player.
+  </ParamField>
+</ResponseField>
+
+```lua
+-- Mark a player as friendly
+Player.SetFriendly("FriendlyPlayer")
+
+-- Log all nearby enemies
+local players = Player.GetPlayers()
+for _, p in ipairs(players) do
+    if not p.IsTeammate and not Player.IsFriendly(p.Name) and p.Distance < 100 then
+        print("[ENEMY]", p.Name, math.floor(p.Distance) .. "m")
+    end
+end
+```

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "aephylia",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#5970B3",
+    "light": "#8B9FD9",
+    "dark": "#3D4F8A",
+    "anchors": {
+      "from": "#5970B3",
+      "to": "#8B9FD9"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "Discord",
+      "url": "https://discord.gg/FWHPBfgEgY"
+    }
+  ],
+  "tabs": [
+    {
+      "name": "API Reference",
+      "url": "api"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Discord",
+      "icon": "discord",
+      "url": "https://discord.gg/FWHPBfgEgY"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": [
+        "introduction",
+        "quickstart",
+        "security"
+      ]
+    },
+    {
+      "group": "Scripting API",
+      "pages": [
+        "api/aimbot",
+        "api/esp",
+        "api/silent-aim",
+        "api/movement",
+        "api/player",
+        "api/input",
+        "api/game",
+        "api/drawing",
+        "api/draw",
+        "api/utilities",
+        "api/filesystem",
+        "api/http",
+        "api/raw-input"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "guides/examples",
+        "guides/notify"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "discord": "https://discord.gg/FWHPBfgEgY"
+  }
+}

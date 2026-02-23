@@ -1,0 +1,160 @@
+---
+title: Game
+description: "Query game instances, world-to-screen projection, and metadata"
+icon: "gamepad"
+---
+
+## Instance Search
+
+<ResponseField name="Game.FindByName(name, maxDepth)" type="table">
+  Searches the Workspace tree for instances matching the given name. Returns an array of results.
+
+  <ParamField path="name" type="string" required>
+    Instance name to search for.
+  </ParamField>
+  <ParamField path="maxDepth" type="number" default="15">
+    Maximum tree depth to search.
+  </ParamField>
+
+  Each result contains:
+  | Field | Type | Description |
+  |-------|------|-------------|
+  | `Address` | number | Memory address of the instance |
+  | `Position` | table | `{ X, Y, Z }` — world position |
+
+  ```lua
+  local spawns = Game.FindByName("SpawnPoint")
+  for _, s in ipairs(spawns) do
+      print("Spawn at:", s.Position.X, s.Position.Y, s.Position.Z)
+  end
+  ```
+</ResponseField>
+
+<ResponseField name="Game.FindInBackpacks(itemName)" type="table">
+  Finds all players carrying a specific tool or item. Checks both Backpack and equipped items (Character).
+
+  <ParamField path="itemName" type="string" required>
+    The name of the tool/item to search for.
+  </ParamField>
+
+  Each result contains:
+  | Field | Type | Description |
+  |-------|------|-------------|
+  | `PlayerName` | string | The player's username |
+  | `ItemName` | string | Name of the item found |
+  | `Location` | string | `"Backpack"` or `"Equipped"` |
+  | `Position` | table | `{ X, Y, Z }` — player position |
+  | `Distance` | number | Distance from local player |
+
+  ```lua
+  local holders = Game.FindInBackpacks("Sword")
+  for _, h in ipairs(holders) do
+      print(h.PlayerName, "has", h.ItemName, "(" .. h.Location .. ")", math.floor(h.Distance) .. "m")
+  end
+  ```
+</ResponseField>
+
+---
+
+## Instance Data
+
+<ResponseField name="Game.GetInstancePosition(address)" type="table | nil">
+  Gets the world position of an instance by its memory address.
+
+  <ParamField path="address" type="number" required>
+    The instance memory address (e.g. from `Game.FindByName`).
+  </ParamField>
+
+  **Returns:** `{ X, Y, Z }` or `nil` if invalid.
+</ResponseField>
+
+<ResponseField name="Game.GetInstanceName(address)" type="string | nil">
+  Gets the name of an instance by its memory address.
+
+  <ParamField path="address" type="number" required>
+    The instance memory address.
+  </ParamField>
+</ResponseField>
+
+---
+
+## Projection
+
+<ResponseField name="Game.WorldToScreen(x, y, z)" type="table">
+  Converts a 3D world position to 2D screen coordinates.
+
+  <ParamField path="x" type="number" required>World X</ParamField>
+  <ParamField path="y" type="number" required>World Y</ParamField>
+  <ParamField path="z" type="number" required>World Z</ParamField>
+
+  **Returns:** `{ X: number, Y: number, OnScreen: boolean }`
+
+  ```lua
+  local pos = Player.GetLocalPosition()
+  local screen = Game.WorldToScreen(pos.X, pos.Y + 5, pos.Z)
+  if screen.OnScreen then
+      Draw.Text(screen.X, screen.Y, "Above Me", 0, 255, 0)
+  end
+  ```
+</ResponseField>
+
+---
+
+## Position & Distance
+
+<ResponseField name="Game.GetLocalPlayerPosition()" type="table">
+  Returns the local player's world position.
+
+  **Returns:** `{ X, Y, Z }` — same as `Player.GetLocalPosition()`.
+</ResponseField>
+
+<ResponseField name="Game.DistanceTo(x, y, z)" type="number">
+  Returns the 3D Euclidean distance from the local player to the given world position.
+
+  <ParamField path="x" type="number" required>World X</ParamField>
+  <ParamField path="y" type="number" required>World Y</ParamField>
+  <ParamField path="z" type="number" required>World Z</ParamField>
+</ResponseField>
+
+<ResponseField name="Game.GetScreenSize()" type="table">
+  Returns the current viewport dimensions.
+
+  **Returns:** `{ Width: number, Height: number }`
+
+  ```lua
+  local size = Game.GetScreenSize()
+  local cx, cy = size.Width / 2, size.Height / 2
+  Draw.Circle(cx, cy, 5, 255, 255, 255) -- screen center
+  ```
+</ResponseField>
+
+---
+
+## Metadata
+
+<ResponseField name="Game.GetUniverseId()" type="number">
+  Returns the current game's Universe ID.
+</ResponseField>
+
+<ResponseField name="Game.GetLocalPlayerId()" type="number">
+  Returns the local player's Roblox User ID.
+</ResponseField>
+
+<ResponseField name="Game.GetTime()" type="number">
+  Returns high-precision elapsed seconds since the first call. Useful for timing and animations.
+
+  ```lua
+  local start = Game.GetTime()
+  -- ... do work ...
+  local elapsed = Game.GetTime() - start
+  print("Took " .. elapsed .. "s")
+  ```
+</ResponseField>
+
+<ResponseField name="Game.GetPlaceId()" type="number">
+  Returns the current Place ID.
+</ResponseField>
+
+<ResponseField name="Game.GetJobId()" type="string">
+  Returns the current server Job ID.
+</ResponseField>

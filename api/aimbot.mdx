@@ -1,0 +1,174 @@
+---
+title: Aimbot
+description: "Control aimbot settings, FOV, smoothing, keybinds, and targeting"
+icon: "crosshairs"
+---
+
+## Toggle
+
+<ResponseField name="Aimbot.Enable()" type="void">
+  Enable the aimbot.
+</ResponseField>
+
+<ResponseField name="Aimbot.Disable()" type="void">
+  Disable the aimbot.
+</ResponseField>
+
+<ResponseField name="Aimbot.Toggle()" type="boolean">
+  Toggle the aimbot on/off. Returns the new state.
+</ResponseField>
+
+<ResponseField name="Aimbot.IsEnabled()" type="boolean">
+  Returns whether the aimbot is currently enabled.
+</ResponseField>
+
+```lua
+if not Aimbot.IsEnabled() then
+    Aimbot.Enable()
+    notify("Aimbot turned on", "Script", 2, 1)
+end
+```
+
+## FOV
+
+<ResponseField name="Aimbot.SetFOV(value)" type="void">
+  Set the aimbot FOV circle radius in pixels.
+  <ParamField path="value" type="number" required>
+    FOV radius (e.g. `150`)
+  </ParamField>
+</ResponseField>
+
+<ResponseField name="Aimbot.GetFOV()" type="number">
+  Returns the current FOV radius.
+</ResponseField>
+
+## Smoothing
+
+<ResponseField name="Aimbot.SetSmoothing(x, y?)" type="void">
+  Set aim smoothing. Higher = slower, more human-like.
+  <ParamField path="x" type="number" required>
+    Horizontal smoothing factor
+  </ParamField>
+  <ParamField path="y" type="number">
+    Vertical smoothing factor. Defaults to `x` if omitted.
+  </ParamField>
+</ResponseField>
+
+<ResponseField name="Aimbot.GetSmoothing()" type="number, number">
+  Returns the current smoothing as two values: `x, y`.
+</ResponseField>
+
+```lua
+local sx, sy = Aimbot.GetSmoothing()
+print("Smoothing: " .. sx .. ", " .. sy)
+```
+
+## Targeting
+
+<ResponseField name="Aimbot.SetTarget(index)" type="void">
+  Set which bone to aim at.
+  <ParamField path="index" type="number" required>
+    `0` = head, `1` = torso, etc.
+  </ParamField>
+</ResponseField>
+
+<ResponseField name="Aimbot.GetTarget()" type="number">
+  Returns the current target bone index.
+</ResponseField>
+
+## Mode
+
+<ResponseField name="Aimbot.SetMode(mode)" type="void">
+  Set the aimbot mode.
+  <ParamField path="mode" type="number" required>
+    | Value | Mode |
+    |---|---|
+    | `0` | Mouse (moves the mouse cursor) |
+    | `1` | Memory (writes aim directly) |
+    | `2` | Camera (writes camera angles) |
+  </ParamField>
+</ResponseField>
+
+<ResponseField name="Aimbot.GetMode()" type="number">
+  Returns the current aimbot mode.
+</ResponseField>
+
+## Team check
+
+<ResponseField name="Aimbot.SetTeamCheck(enabled)" type="void">
+  Enable or disable team checking (skip teammates).
+  <ParamField path="enabled" type="boolean" required />
+</ResponseField>
+
+<ResponseField name="Aimbot.GetTeamCheck()" type="boolean">
+  Returns whether team check is enabled.
+</ResponseField>
+
+## Prediction
+
+<ResponseField name="Aimbot.SetPrediction(enabled, predX, predY)" type="void">
+  Configure velocity prediction for moving targets.
+  <ParamField path="enabled" type="boolean" required />
+  <ParamField path="predX" type="number" required>
+    Horizontal prediction multiplier
+  </ParamField>
+  <ParamField path="predY" type="number" required>
+    Vertical prediction multiplier
+  </ParamField>
+</ResponseField>
+
+## Easing
+
+<ResponseField name="Aimbot.SetEasingStyle(style)" type="void">
+  Set the easing curve for aim movement.
+  <ParamField path="style" type="number" required>
+    | Value | Style |
+    |---|---|
+    | `0` | Linear |
+    | `1` | Sine |
+    | `2` | Quad |
+    | `3` | Cubic |
+    | `4` | Quart |
+    | `5` | Quint |
+    | `6` | Expo |
+    | `7` | Circ |
+    | `8` | Back |
+    | `9` | Bounce |
+    | `10` | Elastic |
+  </ParamField>
+</ResponseField>
+
+## Keybind
+
+<ResponseField name="Aimbot.SetKey(vkCode, mode)" type="void">
+  Set the activation keybind.
+  <ParamField path="vkCode" type="number" required>
+    Windows virtual key code (e.g. `0x02` for right mouse button)
+  </ParamField>
+  <ParamField path="mode" type="number" required>
+    | Value | Mode |
+    |---|---|
+    | `0` | Hold (active while key is held) |
+    | `1` | Toggle (press to flip on/off) |
+    | `2` | Always on |
+  </ParamField>
+</ResponseField>
+
+## Hitbox Expander
+
+<ResponseField name="Aimbot.SetHitboxExpander(enabled, sX, sY, sZ)" type="void">
+  Scale target hitboxes to make them easier to hit.
+  <ParamField path="enabled" type="boolean" required />
+  <ParamField path="sX" type="number" required>Width scale</ParamField>
+  <ParamField path="sY" type="number" required>Height scale</ParamField>
+  <ParamField path="sZ" type="number" required>Depth scale</ParamField>
+</ResponseField>
+
+## Sensitivity
+
+<ResponseField name="Aimbot.SetSensitivity(value)" type="void">
+  Set the aim sensitivity multiplier.
+  <ParamField path="value" type="number" required>
+    `1.0` = default, lower = less aggressive
+  </ParamField>
+</ResponseField>

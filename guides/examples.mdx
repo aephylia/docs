@@ -1,0 +1,207 @@
+---
+title: Examples
+description: "Ready-to-use script examples"
+icon: "code"
+---
+
+## Toggle ESP with Keybind
+
+```lua
+while true do
+    if Input.IsKeyPressed(0x74) then -- F5
+        local state = ESP.Toggle()
+        notify(state and "ESP ON" or "ESP OFF", "Toggle", 2, state and 1 or 2)
+    end
+    wait(0.01)
+end
+```
+
+---
+
+## Dynamic FOV Based on Distance
+
+```lua
+Aimbot.Enable()
+
+while true do
+    local closest = Player.GetClosest(true)
+    if closest then
+        local fov = math.max(50, 300 - closest.Distance * 2)
+        Aimbot.SetFOV(fov)
+    end
+    wait(0.05)
+end
+```
+
+---
+
+## Auto-Save Player Logs
+
+```lua
+makefolder("logs")
+local players = Player.GetPlayers()
+local log = ""
+for _, p in ipairs(players) do
+    log = log .. p.Name
+        .. " | HP: " .. p.Health .. "/" .. p.MaxHealth
+        .. " | Dist: " .. math.floor(p.Distance) .. "m"
+        .. "\n"
+end
+writefile("logs/players_" .. os.time() .. ".txt", log)
+notify("Saved " .. #players .. " players", "Logger", 2, 1)
+```
+
+---
+
+## Load Remote Script
+
+```lua
+local url = "https://raw.githubusercontent.com/user/repo/main/script.lua"
+local code = HttpGet(url)
+local fn, err = loadstring(code)
+if fn then
+    fn()
+    notify("Remote script loaded", "Loader", 2, 1)
+else
+    notify("Error: " .. err, "Loader", 5, 2)
+end
+```
+
+---
+
+## OOP Crosshair
+
+A persistent crosshair that stays on screen without a loop:
+
+```lua
+local size = Game.GetScreenSize()
+local cx, cy = size.Width / 2, size.Height / 2
+local gap = 3
+local len = 10
+
+local lines = {}
+local offsets = {
+    { -len, 0, -gap, 0 },
+    { gap, 0, len, 0 },
+    { 0, -len, 0, -gap },
+    { 0, gap, 0, len },
+}
+
+for _, o in ipairs(offsets) do
+    local l = Drawing.new("Line")
+    l.From = Vector2.new(cx + o[1], cy + o[2])
+    l.To = Vector2.new(cx + o[3], cy + o[4])
+    l.Color = Color3.fromRGB(0, 255, 0)
+    l.Thickness = 2
+    l.Visible = true
+    table.insert(lines, l)
+end
+
+local dot = Drawing.new("Circle")
+dot.Position = Vector2.new(cx, cy)
+dot.Radius = 2
+dot.Color = Color3.fromRGB(0, 255, 0)
+dot.Filled = true
+dot.Visible = true
+
+notify("Crosshair created", "Drawing", 2, 1)
+```
+
+---
+
+## JSON Config System
+
+```lua
+local FILE = "my_settings.json"
+
+local defaults = {
+    aimbot = { enabled = false, fov = 150, smooth = 5 },
+    esp = { enabled = true, boxes = true, names = true, distance = true },
+}
+
+-- Load
+local cfg
+if isfile(FILE) then
+    cfg = JSONDecode(readfile(FILE))
+    notify("Settings loaded", "Config", 2, 1)
+else
+    cfg = defaults
+    writefile(FILE, JSONEncode(defaults))
+    notify("Created default config", "Config", 2, 0)
+end
+
+-- Apply
+if cfg.aimbot.enabled then
+    Aimbot.Enable()
+    Aimbot.SetFOV(cfg.aimbot.fov)
+    Aimbot.SetSmoothing(cfg.aimbot.smooth)
+end
+
+if cfg.esp.enabled then
+    ESP.Enable()
+    ESP.SetBoxes(cfg.esp.boxes)
+    ESP.SetNames(cfg.esp.names)
+    ESP.SetDistance(cfg.esp.distance)
+end
+
+-- Save on F9
+while true do
+    if Input.IsKeyPressed(0x78) then -- F9
+        writefile(FILE, JSONEncode(cfg))
+        notify("Settings saved", "Config", 2, 1)
+    end
+    wait(0.01)
+end
+```
+
+---
+
+## Custom ESP Flags
+
+```lua
+-- Mark specific players with custom tags
+ESP.Enable()
+ESP.SetFlags(true)
+
+local players = Player.GetPlayers()
+for _, p in ipairs(players) do
+    if p.Distance < 50 then
+        ESP.AddPlayerFlag(p.Name, "CLOSE", 255, 50, 50)
+    end
+    if p.Health < 30 then
+        ESP.AddPlayerFlag(p.Name, "LOW HP", 255, 200, 0)
+    end
+end
+```
+
+---
+
+## Weapon Finder
+
+```lua
+-- Find all players with a specific weapon
+local holders = Game.FindInBackpacks("AK-47")
+print("Players with AK-47:")
+for _, h in ipairs(holders) do
+    local status = h.Location == "Equipped" and "🔫 USING" or "🎒 stored"
+    print("  " .. h.PlayerName .. " - " .. status .. " (" .. math.floor(h.Distance) .. "m)")
+end
+```
+
+---
+
+## World Label
+
+```lua
+-- Draw a label at a world position
+while true do
+    local spawns = Game.FindByName("SpawnPoint")
+    for _, s in ipairs(spawns) do
+        local screen = Game.WorldToScreen(s.Position.X, s.Position.Y + 3, s.Position.Z)
+        if screen.OnScreen then
+            Draw.Text(screen.X - 25, screen.Y, "SPAWN", 255, 255, 0, 255, true)
+        end
+    end
+    wait(0.01)
+end
+```

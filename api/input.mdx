@@ -1,0 +1,71 @@
+---
+title: Input
+description: "Read keyboard and mouse state"
+icon: "keyboard"
+---
+
+The `Input` library is for **reading** key states (polling). For **simulating** input, see [Raw Input](/api/raw-input).
+
+## Functions
+
+<ResponseField name="Input.IsKeyDown(keycode)" type="boolean">
+  Returns `true` if the key is currently held down.
+
+  <ParamField path="keycode" type="number" required>
+    [Virtual Key Code](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes)
+  </ParamField>
+
+  ```lua
+  -- Check if W is held
+  if Input.IsKeyDown(0x57) then
+      print("Moving forward!")
+  end
+  ```
+</ResponseField>
+
+<ResponseField name="Input.IsKeyPressed(keycode)" type="boolean">
+  Returns `true` on the **first frame** the key is pressed (rising edge). Useful for toggle logic — only fires once per press, not while held.
+
+  <ParamField path="keycode" type="number" required>
+    [Virtual Key Code](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes)
+  </ParamField>
+
+  ```lua
+  -- Toggle ESP with F5
+  while true do
+      if Input.IsKeyPressed(0x74) then -- F5
+          local state = ESP.Toggle()
+          notify(state and "ESP ON" or "ESP OFF", "Toggle", 2, 0)
+      end
+      wait(0.01)
+  end
+  ```
+</ResponseField>
+
+<ResponseField name="Input.GetMousePosition()" type="table">
+  Returns the current mouse cursor position in screen coordinates.
+
+  **Returns:** `{ X: number, Y: number }`
+
+  ```lua
+  local mouse = Input.GetMousePosition()
+  Draw.Circle(mouse.X, mouse.Y, 5, 255, 0, 0)
+  ```
+</ResponseField>
+
+---
+
+## Common Key Codes
+
+| Key | Code | Key | Code |
+|-----|------|-----|------|
+| W | `0x57` | A | `0x41` |
+| S | `0x53` | D | `0x44` |
+| Space | `0x20` | Shift | `0x10` |
+| Enter | `0x0D` | Escape | `0x1B` |
+| Tab | `0x09` | Ctrl | `0x11` |
+| 0-9 | `0x30`–`0x39` | F1-F12 | `0x70`–`0x7B` |
+
+<Tip>
+  Use `IsKeyPressed` for toggles and one-shot actions. Use `IsKeyDown` for continuous actions like movement.
+</Tip>

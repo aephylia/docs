@@ -1,0 +1,219 @@
+---
+title: Utilities
+description: "Print, encode, decode, clipboard, JSON, and more"
+icon: "wrench"
+---
+
+## Console Output
+
+<ResponseField name="print(...)" type="void">
+  Prints to the script console. Accepts multiple arguments, separated by tabs.
+
+  ```lua
+  print("Hello", "World", 123)
+  -- Output: Hello	World	123.000000
+  ```
+</ResponseField>
+
+<ResponseField name="warn(...)" type="void">
+  Prints with a `[WARN]` prefix. Same behavior as `print`.
+
+  ```lua
+  warn("Low health!")
+  -- Output: [WARN] Low health!
+  ```
+</ResponseField>
+
+<ResponseField name="error(message, level)" type="void">
+  Prints with an `[ERROR]` prefix and raises a Lua error.
+
+  <ParamField path="message" type="string" default="">Error message</ParamField>
+  <ParamField path="level" type="number" default="1">Error level (stack depth)</ParamField>
+</ResponseField>
+
+---
+
+## Notifications
+
+<ResponseField name="notify(message, title, duration, type)" type="void">
+  Shows an animated toast notification on the overlay.
+
+  <ParamField path="message" type="string" required>Notification message</ParamField>
+  <ParamField path="title" type="string" default="aephylia">Notification title</ParamField>
+  <ParamField path="duration" type="number" default="5.0">Display time in seconds</ParamField>
+  <ParamField path="type" type="number" default="0">
+    Notification type:
+    - `0` — Info (accent color)
+    - `1` — Success (green)
+    - `2` — Error (red)
+    - `3` — Warning (amber)
+  </ParamField>
+
+  ```lua
+  notify("Script loaded!", "My Script", 3, 1)  -- green success
+  notify("Something broke", "Error", 5, 2)     -- red error
+  notify("Be careful", "Warning", 4, 3)        -- amber warning
+  ```
+</ResponseField>
+
+---
+
+## Timing
+
+<ResponseField name="wait(seconds)" type="void">
+  Pauses script execution. The script can still be stopped cleanly during a wait.
+
+  <ParamField path="seconds" type="number" default="0.03">
+    Time to wait in seconds. Minimum is `0.03`.
+  </ParamField>
+
+  ```lua
+  wait(1.5) -- pauses 1.5 seconds
+  ```
+</ResponseField>
+
+---
+
+## Executor Info
+
+<ResponseField name="identifyexecutor()" type="string, string">
+  Returns the executor name and version.
+
+  ```lua
+  local name, version = identifyexecutor()
+  print(name)    -- "aephylia"
+  print(version) -- "1.0.0"
+  ```
+</ResponseField>
+
+<ResponseField name="aephylia.GetVersion()" type="string">
+  Returns the current aephylia version string.
+</ResponseField>
+
+<ResponseField name="aephylia.GetExecutor()" type="string, string">
+  Returns `"aephylia"` and the version string.
+</ResponseField>
+
+<ResponseField name="isrbxactive()" type="boolean">
+  Returns `true` if the Roblox window is currently in the foreground.
+
+  ```lua
+  while true do
+      if isrbxactive() then
+          -- only run logic when Roblox is focused
+      end
+      wait(0.1)
+  end
+  ```
+</ResponseField>
+
+---
+
+## Encoding
+
+<ResponseField name="base64encode(data)" type="string">
+  Encodes a string to Base64.
+
+  <ParamField path="data" type="string" required>Raw string data</ParamField>
+
+  ```lua
+  local encoded = base64encode("Hello World")
+  print(encoded) -- "SGVsbG8gV29ybGQ="
+  ```
+</ResponseField>
+
+<ResponseField name="base64decode(encoded)" type="string">
+  Decodes a Base64 string.
+
+  <ParamField path="encoded" type="string" required>Base64-encoded string</ParamField>
+
+  ```lua
+  local decoded = base64decode("SGVsbG8gV29ybGQ=")
+  print(decoded) -- "Hello World"
+  ```
+</ResponseField>
+
+---
+
+## JSON
+
+<ResponseField name="JSONEncode(table)" type="string">
+  Converts a Lua table to a JSON string. Supports nested tables, arrays (sequential integer keys starting at 1), strings, numbers, booleans, and nil. Max nesting depth is 64.
+
+  <ParamField path="table" type="table" required>The Lua table to encode</ParamField>
+
+  ```lua
+  local data = { name = "player1", score = 100, alive = true }
+  local json = JSONEncode(data)
+  print(json) -- {"alive":true,"name":"player1","score":100}
+  ```
+</ResponseField>
+
+<ResponseField name="JSONDecode(jsonStr)" type="table">
+  Parses a JSON string into a Lua table. Supports full JSON spec including unicode escapes.
+
+  <ParamField path="jsonStr" type="string" required>JSON string to parse</ParamField>
+
+  ```lua
+  local data = JSONDecode('{"name":"player1","score":100}')
+  print(data.name)  -- "player1"
+  print(data.score) -- 100
+  ```
+</ResponseField>
+
+---
+
+## Clipboard
+
+<ResponseField name="setclipboard(text)" type="void">
+  Copies text to the Windows clipboard.
+
+  <ParamField path="text" type="string" required>Text to copy</ParamField>
+
+  ```lua
+  setclipboard("Copied text!")
+  ```
+</ResponseField>
+
+<ResponseField name="getclipboard()" type="string">
+  Returns the current clipboard text. Returns an empty string if the clipboard is empty or doesn't contain text.
+</ResponseField>
+
+---
+
+## Constructors
+
+These constructors create simple data tables used throughout the API.
+
+<ResponseField name="Vector2.new(x, y)" type="table">
+  Creates a `{ X, Y }` table.
+
+  <ParamField path="x" type="number" default="0">X value</ParamField>
+  <ParamField path="y" type="number" default="0">Y value</ParamField>
+
+  ```lua
+  local pos = Vector2.new(100, 200)
+  print(pos.X, pos.Y) -- 100, 200
+  ```
+</ResponseField>
+
+<ResponseField name="Color3.new(r, g, b)" type="table">
+  Creates a `{ R, G, B }` color table. Values are **0–1**.
+
+  <ParamField path="r" type="number" default="0">Red (0–1)</ParamField>
+  <ParamField path="g" type="number" default="0">Green (0–1)</ParamField>
+  <ParamField path="b" type="number" default="0">Blue (0–1)</ParamField>
+</ResponseField>
+
+<ResponseField name="Color3.fromRGB(r, g, b)" type="table">
+  Creates a `{ R, G, B }` color table. Values are **0–255** and are divided by 255 internally.
+
+  <ParamField path="r" type="number" default="0">Red (0–255)</ParamField>
+  <ParamField path="g" type="number" default="0">Green (0–255)</ParamField>
+  <ParamField path="b" type="number" default="0">Blue (0–255)</ParamField>
+
+  ```lua
+  local red = Color3.fromRGB(255, 0, 0)
+  local white = Color3.new(1, 1, 1)
+  ```
+</ResponseField>

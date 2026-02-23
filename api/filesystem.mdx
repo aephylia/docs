@@ -1,0 +1,157 @@
+---
+title: File System
+description: "Sandboxed file I/O operations"
+icon: "folder-open"
+---
+
+All file operations are **sandboxed** to `Documents/aephylia/workspace/`. Paths containing `..` or `:` are blocked for security.
+
+<Warning>
+  File paths are relative to the workspace root. You cannot escape the sandbox — any attempt to use `..` or absolute paths with `:` will be rejected.
+</Warning>
+
+---
+
+## Reading
+
+<ResponseField name="readfile(path)" type="string">
+  Reads the entire contents of a file as a string. Errors if the file does not exist.
+
+  <ParamField path="path" type="string" required>Relative path within workspace</ParamField>
+
+  ```lua
+  local data = readfile("config.json")
+  local config = JSONDecode(data)
+  print(config.name)
+  ```
+</ResponseField>
+
+---
+
+## Writing
+
+<ResponseField name="writefile(path, content)" type="void">
+  Writes content to a file. Creates the file if it doesn't exist, **overwrites** if it does.
+
+  <ParamField path="path" type="string" required>Relative path</ParamField>
+  <ParamField path="content" type="string" required>File content</ParamField>
+
+  ```lua
+  local config = { fov = 150, smooth = 5 }
+  writefile("config.json", JSONEncode(config))
+  ```
+</ResponseField>
+
+<ResponseField name="appendfile(path, content)" type="void">
+  Appends content to the end of an existing file.
+
+  <ParamField path="path" type="string" required>Relative path</ParamField>
+  <ParamField path="content" type="string" required>Content to append</ParamField>
+
+  ```lua
+  appendfile("log.txt", os.date() .. " - Script started\n")
+  ```
+</ResponseField>
+
+---
+
+## Checking
+
+<ResponseField name="isfile(path)" type="boolean">
+  Returns `true` if the path points to an existing file.
+
+  <ParamField path="path" type="string" required>Relative path</ParamField>
+</ResponseField>
+
+<ResponseField name="isfolder(path)" type="boolean">
+  Returns `true` if the path points to an existing directory.
+
+  <ParamField path="path" type="string" required>Relative path</ParamField>
+</ResponseField>
+
+---
+
+## Directories
+
+<ResponseField name="makefolder(path)" type="void">
+  Creates a directory and all parent directories.
+
+  <ParamField path="path" type="string" required>Relative path</ParamField>
+
+  ```lua
+  makefolder("saves/backups")
+  ```
+</ResponseField>
+
+<ResponseField name="delfolder(path)" type="void">
+  Recursively deletes a directory and all its contents.
+
+  <ParamField path="path" type="string" required>Relative path</ParamField>
+</ResponseField>
+
+---
+
+## Deleting
+
+<ResponseField name="delfile(path)" type="void">
+  Deletes a single file.
+
+  <ParamField path="path" type="string" required>Relative path</ParamField>
+</ResponseField>
+
+---
+
+## Listing
+
+<ResponseField name="listfiles(path)" type="table">
+  Lists all files and folders in a directory. Returns relative paths using `/` separators. Errors if the path is not a directory.
+
+  <ParamField path="path" type="string" required>Relative directory path</ParamField>
+
+  ```lua
+  local files = listfiles("saves")
+  for _, file in ipairs(files) do
+      print(file)
+  end
+  -- saves/save1.json
+  -- saves/save2.json
+  ```
+</ResponseField>
+
+---
+
+## Full Example — Config System
+
+```lua
+local CONFIG_FILE = "my_config.json"
+
+-- Default config
+local defaults = {
+    aimbot = { enabled = false, fov = 150, smooth = 5 },
+    esp = { enabled = true, boxes = true, names = true },
+}
+
+-- Load or create config
+local config
+if isfile(CONFIG_FILE) then
+    config = JSONDecode(readfile(CONFIG_FILE))
+    notify("Config loaded", "Config", 2, 1)
+else
+    config = defaults
+    writefile(CONFIG_FILE, JSONEncode(defaults))
+    notify("Default config created", "Config", 2, 0)
+end
+
+-- Apply settings
+if config.aimbot.enabled then
+    Aimbot.Enable()
+    Aimbot.SetFOV(config.aimbot.fov)
+    Aimbot.SetSmoothing(config.aimbot.smooth)
+end
+
+if config.esp.enabled then
+    ESP.Enable()
+    ESP.SetBoxes(config.esp.boxes)
+    ESP.SetNames(config.esp.names)
+end
+```
