@@ -1,0 +1,79 @@
+---
+title: Audio
+description: "Play sounds, generate tones, and control audio playback"
+---
+
+The `audio` library provides basic sound playback using the Windows audio system.
+
+---
+
+## Functions
+
+### `audio.playSound(wavData, loop?)`
+
+Plays a WAV file from raw binary data in memory. Use `FileSystem.ReadFile()` to load WAV files.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `wavData` | string | — | Raw WAV file data (binary) |
+| `loop` | bool | `false` | Loop the sound continuously |
+
+```lua
+local wav = FileSystem.ReadFile("alert.wav")
+audio.playSound(wav)
+
+-- Loop a sound
+local bgm = FileSystem.ReadFile("music.wav")
+audio.playSound(bgm, true)
+```
+
+<Warning>
+  Only one WAV sound can play at a time via `playSound`. Starting a new sound stops the previous one.
+</Warning>
+
+### `audio.beep(frequency, durationMs)`
+
+Generates a simple sine-wave beep tone. Runs asynchronously — does not block the script.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `frequency` | integer | Frequency in Hz (37–32767) |
+| `durationMs` | integer | Duration in milliseconds |
+
+```lua
+-- Short alert beep
+audio.beep(800, 200)
+
+-- Musical sequence
+audio.beep(523, 300) -- C
+wait(0.35)
+audio.beep(659, 300) -- E
+wait(0.35)
+audio.beep(784, 300) -- G
+```
+
+### `audio.stopAll()`
+
+Immediately stops all currently playing sounds.
+
+```lua
+audio.stopAll()
+```
+
+---
+
+## Example: Hit sound
+
+```lua
+local hitSound = FileSystem.ReadFile("hit.wav")
+
+while true do
+    local players = Player.GetPlayers()
+    for _, p in ipairs(players) do
+        if p.Health < p.MaxHealth and not p.IsTeammate then
+            audio.playSound(hitSound)
+        end
+    end
+    wait(0.1)
+end
+```

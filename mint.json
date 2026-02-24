@@ -58,7 +58,9 @@
         "api/utilities",
         "api/filesystem",
         "api/http",
-        "api/raw-input"
+        "api/raw-input",
+        "api/ui",
+        "api/audio"
       ]
     },
     {

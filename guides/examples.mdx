@@ -176,20 +176,6 @@ end
 
 ---
 
-## Weapon Finder
-
-```lua
--- Find all players with a specific weapon
-local holders = Game.FindInBackpacks("AK-47")
-print("Players with AK-47:")
-for _, h in ipairs(holders) do
-    local status = h.Location == "Equipped" and "🔫 USING" or "🎒 stored"
-    print("  " .. h.PlayerName .. " - " .. status .. " (" .. math.floor(h.Distance) .. "m)")
-end
-```
-
----
-
 ## World Label
 
 ```lua

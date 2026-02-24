@@ -9,7 +9,7 @@ description: "Lua scripting engine for aephylia"
 
 ## What is the aephylia Lua API?
 
-aephylia embeds a full **Lua 5.4** runtime that lets you write custom scripts to automate features, create overlays, react to game events, and build entirely new functionality on top of the engine.
+aephylia embeds a high-performance **LuaJIT** runtime that lets you write custom scripts to automate features, create overlays, react to game events, and build entirely new functionality on top of the engine. LuaJIT compiles Lua to native machine code, giving scripts near-C performance.
 
 Scripts run in **background threads** with their own isolated state. Each script can be started, stopped, and edited independently from the built-in script editor.
 
@@ -39,6 +39,12 @@ Scripts run in **background threads** with their own isolated state. Each script
   </Card>
   <Card title="File System" icon="folder" href="/api/filesystem">
     Sandboxed read/write to `Documents\aephylia\workspace`
+  </Card>
+  <Card title="Menu UI" icon="sliders" href="/api/ui">
+    Create custom tabs, containers, and interactive widgets from scripts
+  </Card>
+  <Card title="Audio" icon="volume-high" href="/api/audio">
+    Play WAV sounds, generate beeps, and control audio playback
   </Card>
 </CardGroup>
 

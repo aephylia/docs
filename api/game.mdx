@@ -30,30 +30,6 @@ icon: "gamepad"
   ```
 </ResponseField>
 
-<ResponseField name="Game.FindInBackpacks(itemName)" type="table">
-  Finds all players carrying a specific tool or item. Checks both Backpack and equipped items (Character).
-
-  <ParamField path="itemName" type="string" required>
-    The name of the tool/item to search for.
-  </ParamField>
-
-  Each result contains:
-  | Field | Type | Description |
-  |-------|------|-------------|
-  | `PlayerName` | string | The player's username |
-  | `ItemName` | string | Name of the item found |
-  | `Location` | string | `"Backpack"` or `"Equipped"` |
-  | `Position` | table | `{ X, Y, Z }` — player position |
-  | `Distance` | number | Distance from local player |
-
-  ```lua
-  local holders = Game.FindInBackpacks("Sword")
-  for _, h in ipairs(holders) do
-      print(h.PlayerName, "has", h.ItemName, "(" .. h.Location .. ")", math.floor(h.Distance) .. "m")
-  end
-  ```
-</ResponseField>
-
 ---
 
 ## Instance Data
