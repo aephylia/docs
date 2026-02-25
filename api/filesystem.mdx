@@ -1,13 +1,13 @@
 ---
 title: File System
-description: "Sandboxed file I/O operations"
+description: "Sandboxed file I/O for reading, writing, and managing files"
 icon: "folder-open"
 ---
 
-All file operations are **sandboxed** to `Documents/aephylia/workspace/`. Paths containing `..` or `:` are blocked for security.
+All file operations are **sandboxed** to `Documents/aephylia/workspace/`. You can't escape this directory — paths with `..` or `:` are blocked automatically.
 
 <Warning>
-  File paths are relative to the workspace root. You cannot escape the sandbox — any attempt to use `..` or absolute paths with `:` will be rejected.
+  All paths are relative to the workspace root. Trying to use `..` to go up or absolute paths with `:` will throw an error.
 </Warning>
 
 ---
@@ -15,9 +15,9 @@ All file operations are **sandboxed** to `Documents/aephylia/workspace/`. Paths 
 ## Reading
 
 <ResponseField name="readfile(path)" type="string">
-  Reads the entire contents of a file as a string. Errors if the file does not exist.
+  Reads the entire contents of a file as a string. Throws an error if the file doesn't exist.
 
-  <ParamField path="path" type="string" required>Relative path within workspace</ParamField>
+  <ParamField path="path" type="string" required>Relative path inside your workspace</ParamField>
 
   ```lua
   local data = readfile("config.json")
@@ -31,10 +31,10 @@ All file operations are **sandboxed** to `Documents/aephylia/workspace/`. Paths 
 ## Writing
 
 <ResponseField name="writefile(path, content)" type="void">
-  Writes content to a file. Creates the file if it doesn't exist, **overwrites** if it does.
+  Writes content to a file. Creates it if it doesn't exist, **overwrites** it if it does.
 
   <ParamField path="path" type="string" required>Relative path</ParamField>
-  <ParamField path="content" type="string" required>File content</ParamField>
+  <ParamField path="content" type="string" required>What to write</ParamField>
 
   ```lua
   local config = { fov = 150, smooth = 5 }
@@ -43,13 +43,13 @@ All file operations are **sandboxed** to `Documents/aephylia/workspace/`. Paths 
 </ResponseField>
 
 <ResponseField name="appendfile(path, content)" type="void">
-  Appends content to the end of an existing file.
+  Adds content to the end of an existing file — doesn't overwrite what's already there.
 
   <ParamField path="path" type="string" required>Relative path</ParamField>
   <ParamField path="content" type="string" required>Content to append</ParamField>
 
   ```lua
-  appendfile("log.txt", os.date() .. " - Script started\n")
+  appendfile("log.txt", "Script started at " .. os.date() .. "\n")
   ```
 </ResponseField>
 
@@ -58,23 +58,31 @@ All file operations are **sandboxed** to `Documents/aephylia/workspace/`. Paths 
 ## Checking
 
 <ResponseField name="isfile(path)" type="boolean">
-  Returns `true` if the path points to an existing file.
+  Returns `true` if the path points to a file that exists.
 
   <ParamField path="path" type="string" required>Relative path</ParamField>
 </ResponseField>
 
 <ResponseField name="isfolder(path)" type="boolean">
-  Returns `true` if the path points to an existing directory.
+  Returns `true` if the path points to a directory that exists.
 
   <ParamField path="path" type="string" required>Relative path</ParamField>
 </ResponseField>
+
+```lua
+if isfile("config.json") then
+    print("Config exists!")
+else
+    print("No config found, creating defaults...")
+end
+```
 
 ---
 
 ## Directories
 
 <ResponseField name="makefolder(path)" type="void">
-  Creates a directory and all parent directories.
+  Creates a directory (and any parent directories that don't exist yet).
 
   <ParamField path="path" type="string" required>Relative path</ParamField>
 
@@ -84,7 +92,7 @@ All file operations are **sandboxed** to `Documents/aephylia/workspace/`. Paths 
 </ResponseField>
 
 <ResponseField name="delfolder(path)" type="void">
-  Recursively deletes a directory and all its contents.
+  Recursively deletes a directory and everything inside it. Be careful with this one!
 
   <ParamField path="path" type="string" required>Relative path</ParamField>
 </ResponseField>
@@ -104,7 +112,7 @@ All file operations are **sandboxed** to `Documents/aephylia/workspace/`. Paths 
 ## Listing
 
 <ResponseField name="listfiles(path)" type="table">
-  Lists all files and folders in a directory. Returns relative paths using `/` separators. Errors if the path is not a directory.
+  Returns an array of all files and folders inside a directory. Paths come back as relative paths with `/` separators. Throws an error if the path isn't a directory.
 
   <ParamField path="path" type="string" required>Relative directory path</ParamField>
 
@@ -125,13 +133,12 @@ All file operations are **sandboxed** to `Documents/aephylia/workspace/`. Paths 
 ```lua
 local CONFIG_FILE = "my_config.json"
 
--- Default config
 local defaults = {
     aimbot = { enabled = false, fov = 150, smooth = 5 },
     esp = { enabled = true, boxes = true, names = true },
 }
 
--- Load or create config
+-- Load existing or create fresh
 local config
 if isfile(CONFIG_FILE) then
     config = JSONDecode(readfile(CONFIG_FILE))
@@ -142,7 +149,7 @@ else
     notify("Default config created", "Config", 2, 0)
 end
 
--- Apply settings
+-- Apply it
 if config.aimbot.enabled then
     Aimbot.Enable()
     Aimbot.SetFOV(config.aimbot.fov)

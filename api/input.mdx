@@ -4,12 +4,16 @@ description: "Read keyboard and mouse state"
 icon: "keyboard"
 ---
 
-The `Input` library is for **reading** key states (polling). For **simulating** input, see [Raw Input](/api/raw-input).
+The `Input` library is for **reading** (polling) key and mouse states. Want to check if a key is held down, or detect the exact moment someone presses a key? This is what you use.
+
+For **simulating** input (moving the mouse, pressing keys), see [Raw Input](/api/raw-input).
+
+---
 
 ## Functions
 
 <ResponseField name="Input.IsKeyDown(keycode)" type="boolean">
-  Returns `true` if the key is currently held down.
+  Returns `true` as long as the key is being held down. Fires continuously every frame the key is pressed.
 
   <ParamField path="keycode" type="number" required>
     [Virtual Key Code](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes)
@@ -24,7 +28,7 @@ The `Input` library is for **reading** key states (polling). For **simulating** 
 </ResponseField>
 
 <ResponseField name="Input.IsKeyPressed(keycode)" type="boolean">
-  Returns `true` on the **first frame** the key is pressed (rising edge). Useful for toggle logic — only fires once per press, not while held.
+  Returns `true` only on the **first frame** the key goes from up to down (rising edge). This is what you want for toggles — it only fires once per press, no matter how long you hold the key.
 
   <ParamField path="keycode" type="number" required>
     [Virtual Key Code](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes)
@@ -43,7 +47,7 @@ The `Input` library is for **reading** key states (polling). For **simulating** 
 </ResponseField>
 
 <ResponseField name="Input.GetMousePosition()" type="table">
-  Returns the current mouse cursor position in screen coordinates.
+  Returns where the mouse cursor currently is on screen.
 
   **Returns:** `{ X: number, Y: number }`
 
@@ -59,13 +63,14 @@ The `Input` library is for **reading** key states (polling). For **simulating** 
 
 | Key | Code | Key | Code |
 |-----|------|-----|------|
+| LMB | `0x01` | RMB | `0x02` |
 | W | `0x57` | A | `0x41` |
 | S | `0x53` | D | `0x44` |
 | Space | `0x20` | Shift | `0x10` |
 | Enter | `0x0D` | Escape | `0x1B` |
 | Tab | `0x09` | Ctrl | `0x11` |
-| 0-9 | `0x30`–`0x39` | F1-F12 | `0x70`–`0x7B` |
+| 0–9 | `0x30`–`0x39` | F1–F12 | `0x70`–`0x7B` |
 
 <Tip>
-  Use `IsKeyPressed` for toggles and one-shot actions. Use `IsKeyDown` for continuous actions like movement.
+  Use `IsKeyPressed` for toggles and one-shot actions. Use `IsKeyDown` for continuous stuff like movement or "hold to activate."
 </Tip>

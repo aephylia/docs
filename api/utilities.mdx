@@ -1,31 +1,35 @@
 ---
 title: Utilities
-description: "Print, encode, decode, clipboard, JSON, and more"
+description: "Console output, JSON, base64, clipboard, notifications, and constructors"
 icon: "wrench"
+---
+
+A grab-bag of useful globals and helpers that don't fit neatly into any other category.
+
 ---
 
 ## Console Output
 
 <ResponseField name="print(...)" type="void">
-  Prints to the script console. Accepts multiple arguments, separated by tabs.
+  Prints to the script console. Takes any number of arguments — they get tab-separated.
 
   ```lua
   print("Hello", "World", 123)
-  -- Output: Hello	World	123.000000
+  -- Output: Hello	World	123
   ```
 </ResponseField>
 
 <ResponseField name="warn(...)" type="void">
-  Prints with a `[WARN]` prefix. Same behavior as `print`.
+  Same as `print`, but with a `[WARN]` prefix. Good for non-critical issues.
 
   ```lua
-  warn("Low health!")
-  -- Output: [WARN] Low health!
+  warn("Player not found, retrying...")
+  -- Output: [WARN] Player not found, retrying...
   ```
 </ResponseField>
 
-<ResponseField name="error(message, level)" type="void">
-  Prints with an `[ERROR]` prefix and raises a Lua error.
+<ResponseField name="error(message?, level?)" type="void">
+  Prints with an `[ERROR]` prefix and raises a Lua error. Useful for hard stops when something goes really wrong.
 
   <ParamField path="message" type="string" default="">Error message</ParamField>
   <ParamField path="level" type="number" default="1">Error level (stack depth)</ParamField>
@@ -35,14 +39,14 @@ icon: "wrench"
 
 ## Notifications
 
-<ResponseField name="notify(message, title, duration, type)" type="void">
-  Shows an animated toast notification on the overlay.
+<ResponseField name="notify(message, title?, duration?, type?)" type="void">
+  Shows an animated toast notification on the overlay. These slide in, show a progress bar countdown, and support color-coded types.
 
-  <ParamField path="message" type="string" required>Notification message</ParamField>
-  <ParamField path="title" type="string" default="aephylia">Notification title</ParamField>
-  <ParamField path="duration" type="number" default="5.0">Display time in seconds</ParamField>
+  <ParamField path="message" type="string" required>The notification body text</ParamField>
+  <ParamField path="title" type="string" default="aephylia">Header text shown in bold</ParamField>
+  <ParamField path="duration" type="number" default="5.0">How long it stays visible (seconds)</ParamField>
   <ParamField path="type" type="number" default="0">
-    Notification type:
+    Controls the accent color:
     - `0` — Info (accent color)
     - `1` — Success (green)
     - `2` — Error (red)
@@ -50,9 +54,9 @@ icon: "wrench"
   </ParamField>
 
   ```lua
-  notify("Script loaded!", "My Script", 3, 1)  -- green success
-  notify("Something broke", "Error", 5, 2)     -- red error
-  notify("Be careful", "Warning", 4, 3)        -- amber warning
+  notify("Script loaded!", "My Script", 3, 1)  -- green
+  notify("Something broke", "Error", 5, 2)     -- red
+  notify("Heads up", "Warning", 4, 3)          -- amber
   ```
 </ResponseField>
 
@@ -60,15 +64,15 @@ icon: "wrench"
 
 ## Timing
 
-<ResponseField name="wait(seconds)" type="void">
-  Pauses script execution. The script can still be stopped cleanly during a wait.
+<ResponseField name="wait(seconds?)" type="void">
+  Pauses your script for a given duration. The script can still be stopped cleanly while waiting — the engine checks the stop flag every 10ms.
 
   <ParamField path="seconds" type="number" default="0.03">
-    Time to wait in seconds. Minimum is `0.03`.
+    How long to wait in seconds.
   </ParamField>
 
   ```lua
-  wait(1.5) -- pauses 1.5 seconds
+  wait(1.5) -- pause for 1.5 seconds
   ```
 </ResponseField>
 
@@ -77,12 +81,12 @@ icon: "wrench"
 ## Executor Info
 
 <ResponseField name="identifyexecutor()" type="string, string">
-  Returns the executor name and version.
+  Returns the executor name and version. Useful for compatibility checks with scripts designed for multiple executors.
 
   ```lua
   local name, version = identifyexecutor()
   print(name)    -- "aephylia"
-  print(version) -- "1.0.0"
+  print(version) -- e.g. "1.0.0"
   ```
 </ResponseField>
 
@@ -91,16 +95,16 @@ icon: "wrench"
 </ResponseField>
 
 <ResponseField name="aephylia.GetExecutor()" type="string, string">
-  Returns `"aephylia"` and the version string.
+  Returns `"aephylia"` and the version string. Same as `identifyexecutor()`.
 </ResponseField>
 
 <ResponseField name="isrbxactive()" type="boolean">
-  Returns `true` if the Roblox window is currently in the foreground.
+  Returns `true` if a Roblox window is currently in the foreground. Handy for gating logic so it only runs when the game is focused.
 
   ```lua
   while true do
       if isrbxactive() then
-          -- only run logic when Roblox is focused
+          -- only do stuff when Roblox is focused
       end
       wait(0.1)
   end
@@ -123,7 +127,7 @@ icon: "wrench"
 </ResponseField>
 
 <ResponseField name="base64decode(encoded)" type="string">
-  Decodes a Base64 string.
+  Decodes a Base64 string back to the original data.
 
   <ParamField path="encoded" type="string" required>Base64-encoded string</ParamField>
 
@@ -138,9 +142,9 @@ icon: "wrench"
 ## JSON
 
 <ResponseField name="JSONEncode(table)" type="string">
-  Converts a Lua table to a JSON string. Supports nested tables, arrays (sequential integer keys starting at 1), strings, numbers, booleans, and nil. Max nesting depth is 64.
+  Converts a Lua table to a JSON string. Handles nested tables, arrays, strings, numbers, booleans, and nil. Max nesting depth is 64.
 
-  <ParamField path="table" type="table" required>The Lua table to encode</ParamField>
+  <ParamField path="table" type="table" required>The table to encode</ParamField>
 
   ```lua
   local data = { name = "player1", score = 100, alive = true }
@@ -150,7 +154,7 @@ icon: "wrench"
 </ResponseField>
 
 <ResponseField name="JSONDecode(jsonStr)" type="table">
-  Parses a JSON string into a Lua table. Supports full JSON spec including unicode escapes.
+  Parses a JSON string into a Lua table. Supports the full JSON spec including unicode escapes.
 
   <ParamField path="jsonStr" type="string" required>JSON string to parse</ParamField>
 
@@ -171,21 +175,21 @@ icon: "wrench"
   <ParamField path="text" type="string" required>Text to copy</ParamField>
 
   ```lua
-  setclipboard("Copied text!")
+  setclipboard("Copied!")
   ```
 </ResponseField>
 
 <ResponseField name="getclipboard()" type="string">
-  Returns the current clipboard text. Returns an empty string if the clipboard is empty or doesn't contain text.
+  Returns whatever text is currently on the clipboard. Returns an empty string if it's empty or doesn't contain text.
 </ResponseField>
 
 ---
 
 ## Constructors
 
-These constructors create simple data tables used throughout the API.
+These create simple data tables used throughout the Drawing and other APIs.
 
-<ResponseField name="Vector2.new(x, y)" type="table">
+<ResponseField name="Vector2.new(x?, y?)" type="table">
   Creates a `{ X, Y }` table.
 
   <ParamField path="x" type="number" default="0">X value</ParamField>
@@ -197,16 +201,16 @@ These constructors create simple data tables used throughout the API.
   ```
 </ResponseField>
 
-<ResponseField name="Color3.new(r, g, b)" type="table">
-  Creates a `{ R, G, B }` color table. Values are **0–1**.
+<ResponseField name="Color3.new(r?, g?, b?)" type="table">
+  Creates a `{ R, G, B }` color table. Values are in the **0–1** range.
 
   <ParamField path="r" type="number" default="0">Red (0–1)</ParamField>
   <ParamField path="g" type="number" default="0">Green (0–1)</ParamField>
   <ParamField path="b" type="number" default="0">Blue (0–1)</ParamField>
 </ResponseField>
 
-<ResponseField name="Color3.fromRGB(r, g, b)" type="table">
-  Creates a `{ R, G, B }` color table. Values are **0–255** and are divided by 255 internally.
+<ResponseField name="Color3.fromRGB(r?, g?, b?)" type="table">
+  Creates a `{ R, G, B }` color table from **0–255** values. They get divided by 255 internally so the resulting table still uses 0–1.
 
   <ParamField path="r" type="number" default="0">Red (0–255)</ParamField>
   <ParamField path="g" type="number" default="0">Green (0–255)</ParamField>

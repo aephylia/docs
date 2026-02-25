@@ -1,0 +1,106 @@
+---
+title: Cheat
+description: "Event loop, callbacks, and window info"
+icon: "rotate"
+---
+
+The `cheat` library is your entry point for **event-driven scripts** — instead of busy-looping with `wait()`, you register callbacks and let aephylia call your code every frame. This is especially useful for drawing overlays that need to stay perfectly in sync with the render loop.
+
+---
+
+## Events
+
+### `cheat.register(eventName, callback)`
+
+Registers a function to be called whenever the given event fires.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `eventName` | string | The event to listen for (see below) |
+| `callback` | function | Your function that gets called each time |
+
+**Available events:**
+
+| Event | When it fires |
+|-------|---------------|
+| `"onPaint"` | Every frame, right before the overlay is drawn |
+
+```lua
+cheat.register("onPaint", function()
+    Draw.Text(100, 100, "Drawing every frame!", 255, 255, 255)
+end)
+```
+
+<Tip>
+  You can register multiple callbacks for the same event — they'll all run in order.
+</Tip>
+
+---
+
+### `cheat.run()`
+
+Starts the event loop. This **blocks** the script and keeps it alive, dispatching your registered callbacks every frame until the script is stopped.
+
+Behind the scenes, `cheat.run()` automatically handles swapping the draw buffer each frame, so your `onPaint` drawings show up without you having to call `Draw.Clear()` manually.
+
+```lua
+cheat.register("onPaint", function()
+    local size = Game.GetScreenSize()
+    local cx, cy = size.Width / 2, size.Height / 2
+    Draw.CircleFilled(cx, cy, 3, 0, 255, 0, 255)
+end)
+
+cheat.run() -- blocks here, calls your onPaint every frame
+```
+
+<Warning>
+  Once you call `cheat.run()`, nothing after it will execute until the script is stopped. Put all your setup code (registering callbacks, initializing variables) **before** this call.
+</Warning>
+
+---
+
+### `cheat.getWindowSize()`
+
+Returns the current viewport width and height. Handy for centering things or making responsive layouts.
+
+**Returns:** `width: number, height: number`
+
+```lua
+local w, h = cheat.getWindowSize()
+print("Window is " .. w .. "x" .. h)
+```
+
+---
+
+## When to use `cheat.run()` vs `while true`
+
+Both approaches work, but they have different strengths:
+
+| Approach | Best for |
+|----------|----------|
+| `cheat.run()` + `onPaint` | Drawing overlays — stays perfectly synced with the render loop, no manual `Draw.Clear()` needed |
+| `while true` + `wait()` | Everything else — toggling features, polling input, running game logic |
+
+You can also mix both! Set up your drawing with `cheat.register`, do your logic in the callback, and let `cheat.run()` handle the loop:
+
+```lua
+Aimbot.Enable()
+Aimbot.SetFOV(200)
+
+cheat.register("onPaint", function()
+    -- this runs every frame
+    local size = Game.GetScreenSize()
+    local cx, cy = size.Width / 2, size.Height / 2
+
+    -- draw FOV circle
+    Draw.Circle(cx, cy, 200, 255, 255, 255, 80, 1)
+
+    -- toggle with key
+    if Input.IsKeyPressed(0x74) then -- F5
+        local on = Aimbot.Toggle()
+        notify(on and "ON" or "OFF", "Aimbot", 2, on and 1 or 2)
+    end
+end)
+
+cheat.run()
+```

@@ -1,22 +1,26 @@
 ---
 title: Game
-description: "Query game instances, world-to-screen projection, and metadata"
+description: "Instance search, world-to-screen projection, timing, and game metadata"
 icon: "gamepad"
 ---
 
-## Instance Search
+The `Game` library gives you access to the game world itself — search for instances, project 3D positions to screen space, measure distances, and grab metadata like place/universe IDs.
 
-<ResponseField name="Game.FindByName(name, maxDepth)" type="table">
-  Searches the Workspace tree for instances matching the given name. Returns an array of results.
+---
+
+## Finding Instances
+
+<ResponseField name="Game.FindByName(name, maxDepth?)" type="table">
+  Searches through the Workspace tree for any instances matching the given name. Returns an array of everything it finds.
 
   <ParamField path="name" type="string" required>
-    Instance name to search for.
+    The instance name to search for.
   </ParamField>
   <ParamField path="maxDepth" type="number" default="15">
-    Maximum tree depth to search.
+    How deep into the tree to search. Higher values find more nested stuff but take longer.
   </ParamField>
 
-  Each result contains:
+  Each result has:
   | Field | Type | Description |
   |-------|------|-------------|
   | `Address` | number | Memory address of the instance |
@@ -35,29 +39,25 @@ icon: "gamepad"
 ## Instance Data
 
 <ResponseField name="Game.GetInstancePosition(address)" type="table | nil">
-  Gets the world position of an instance by its memory address.
+  Gets the world position of an instance by its memory address. You'll usually get the address from `Game.FindByName`.
 
-  <ParamField path="address" type="number" required>
-    The instance memory address (e.g. from `Game.FindByName`).
-  </ParamField>
+  <ParamField path="address" type="number" required>The instance memory address</ParamField>
 
-  **Returns:** `{ X, Y, Z }` or `nil` if invalid.
+  **Returns:** `{ X, Y, Z }` or `nil` if the address is invalid.
 </ResponseField>
 
 <ResponseField name="Game.GetInstanceName(address)" type="string | nil">
   Gets the name of an instance by its memory address.
 
-  <ParamField path="address" type="number" required>
-    The instance memory address.
-  </ParamField>
+  <ParamField path="address" type="number" required>The instance memory address</ParamField>
 </ResponseField>
 
 ---
 
-## Projection
+## World-to-Screen Projection
 
 <ResponseField name="Game.WorldToScreen(x, y, z)" type="table">
-  Converts a 3D world position to 2D screen coordinates.
+  Takes a 3D world position and tells you where it would appear on screen. The `OnScreen` flag lets you know if it's actually visible or behind the camera.
 
   <ParamField path="x" type="number" required>World X</ParamField>
   <ParamField path="y" type="number" required>World Y</ParamField>
@@ -79,13 +79,13 @@ icon: "gamepad"
 ## Position & Distance
 
 <ResponseField name="Game.GetLocalPlayerPosition()" type="table">
-  Returns the local player's world position.
+  Returns the local player's world position. Same thing as `Player.GetLocalPosition()` — just an alias for convenience.
 
-  **Returns:** `{ X, Y, Z }` — same as `Player.GetLocalPosition()`.
+  **Returns:** `{ X, Y, Z }`
 </ResponseField>
 
 <ResponseField name="Game.DistanceTo(x, y, z)" type="number">
-  Returns the 3D Euclidean distance from the local player to the given world position.
+  Returns the straight-line distance (in studs) from your character to a world position.
 
   <ParamField path="x" type="number" required>World X</ParamField>
   <ParamField path="y" type="number" required>World Y</ParamField>
@@ -93,7 +93,7 @@ icon: "gamepad"
 </ResponseField>
 
 <ResponseField name="Game.GetScreenSize()" type="table">
-  Returns the current viewport dimensions.
+  Returns the current viewport dimensions. Useful for centering things or building responsive layouts.
 
   **Returns:** `{ Width: number, Height: number }`
 
@@ -106,25 +106,49 @@ icon: "gamepad"
 
 ---
 
-## Metadata
-
-<ResponseField name="Game.GetUniverseId()" type="number">
-  Returns the current game's Universe ID.
-</ResponseField>
-
-<ResponseField name="Game.GetLocalPlayerId()" type="number">
-  Returns the local player's Roblox User ID.
-</ResponseField>
+## Timing
 
 <ResponseField name="Game.GetTime()" type="number">
-  Returns high-precision elapsed seconds since the first call. Useful for timing and animations.
+  Returns high-precision elapsed seconds since the first time you called it. Great for animations, cooldowns, and benchmarking.
 
   ```lua
   local start = Game.GetTime()
-  -- ... do work ...
+  -- ... do something expensive ...
   local elapsed = Game.GetTime() - start
-  print("Took " .. elapsed .. "s")
+  print("Took " .. elapsed .. " seconds")
   ```
+</ResponseField>
+
+<ResponseField name="Game.GetDeltaTime()" type="number">
+  Returns the time in seconds since the last frame was rendered. Essential for frame-rate independent logic — multiply your movement/animation speeds by this to keep things consistent regardless of FPS.
+
+  ```lua
+  cheat.register("onPaint", function()
+      local dt = Game.GetDeltaTime()
+      -- move something 100 pixels per second, regardless of frame rate
+      x = x + 100 * dt
+  end)
+  cheat.run()
+  ```
+</ResponseField>
+
+<ResponseField name="Game.GetTickCount()" type="number">
+  Returns the number of milliseconds since the system started (wraps around after ~49 days). Uses `GetTickCount64` internally.
+
+  ```lua
+  local startMs = Game.GetTickCount()
+  -- ...
+  local elapsedMs = Game.GetTickCount() - startMs
+  print("Elapsed: " .. elapsedMs .. "ms")
+  ```
+</ResponseField>
+
+---
+
+## Game Metadata
+
+<ResponseField name="Game.GetUniverseId()" type="number">
+  Returns the current game's Universe ID.
 </ResponseField>
 
 <ResponseField name="Game.GetPlaceId()" type="number">
@@ -132,5 +156,16 @@ icon: "gamepad"
 </ResponseField>
 
 <ResponseField name="Game.GetJobId()" type="string">
-  Returns the current server Job ID.
+  Returns the current server's Job ID — unique identifier for this specific server instance.
 </ResponseField>
+
+<ResponseField name="Game.GetLocalPlayerId()" type="number">
+  Returns your Roblox User ID.
+</ResponseField>
+
+```lua
+print("Universe:", Game.GetUniverseId())
+print("Place:", Game.GetPlaceId())
+print("Job:", Game.GetJobId())
+print("My ID:", Game.GetLocalPlayerId())
+```

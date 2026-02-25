@@ -4,54 +4,60 @@ description: "Lua scripting engine for aephylia"
 ---
 
 <Note>
-  **Security:** `os`, `io`, `package`, `debug`, `dofile`, `loadfile`, `load`, and `loadstring` are all stripped after initialization. Scripts run in a sandboxed environment.
+  **Security first:** `os`, `io`, `package`, `debug`, `dofile`, `loadfile`, `load`, and `loadstring` are all stripped after initialization. Your scripts run in a sandboxed environment — see [Security](/security) for the full details.
 </Note>
 
 ## What is the aephylia Lua API?
 
-aephylia embeds a high-performance **LuaJIT** runtime that lets you write custom scripts to automate features, create overlays, react to game events, and build entirely new functionality on top of the engine. LuaJIT compiles Lua to native machine code, giving scripts near-C performance.
+aephylia comes with a built-in **LuaJIT** runtime that lets you write custom scripts to automate features, draw overlays, react to game events, and build entirely new functionality on top of the engine. Since LuaJIT compiles Lua to native machine code, your scripts run with near-C performance — no need to worry about scripting overhead.
 
-Scripts run in **background threads** with their own isolated state. Each script can be started, stopped, and edited independently from the built-in script editor.
+Each script runs in its own **background thread** with a completely isolated state. You can start, stop, and edit scripts independently from the built-in script editor, and they won't interfere with each other or the main render loop.
 
-## Feature overview
+## What can you do with it?
 
 <CardGroup cols={2}>
   <Card title="Combat" icon="crosshairs" href="/api/aimbot">
-    Control aimbot, silent aim, and desync settings programmatically
+    Control aimbot, silent aim, and desync settings from your scripts
   </Card>
   <Card title="Visuals" icon="eye" href="/api/esp">
-    Toggle ESP, set colors, add custom player flags, and control world rendering
+    Toggle ESP, customize colors, add custom player flags, tweak world rendering
   </Card>
   <Card title="Movement" icon="plane" href="/api/movement">
-    Enable flight, noclip, and set movement speeds
+    Enable flight, noclip, set speeds — all from Lua
   </Card>
   <Card title="Drawing" icon="pen" href="/api/drawing">
-    Create persistent drawing objects — lines, circles, text, and more
+    Create persistent drawing objects — lines, circles, text, quads, and more
   </Card>
   <Card title="Player Info" icon="users" href="/api/player">
-    Query all players, distances, health, velocity, and manage friendly lists
+    Query all players, check health, distance, velocity, and manage friend lists
   </Card>
   <Card title="Game World" icon="globe" href="/api/game">
-    Search instances, get positions, world-to-screen projection, game metadata
+    Search for instances, world-to-screen projection, timing, and game metadata
+  </Card>
+  <Card title="Event Loop" icon="rotate" href="/api/cheat">
+    Register frame callbacks for perfectly synced overlays with `cheat.run()`
   </Card>
   <Card title="Utilities" icon="wrench" href="/api/utilities">
-    JSON, base64, clipboard, notifications, and more
+    JSON, base64, clipboard, notifications, and general helpers
   </Card>
   <Card title="File System" icon="folder" href="/api/filesystem">
     Sandboxed read/write to `Documents\aephylia\workspace`
   </Card>
   <Card title="Menu UI" icon="sliders" href="/api/ui">
-    Create custom tabs, containers, and interactive widgets from scripts
+    Build custom tabs with checkboxes, sliders, dropdowns, and more
   </Card>
   <Card title="Audio" icon="volume-high" href="/api/audio">
-    Play WAV sounds, generate beeps, and control audio playback
+    Play WAV sounds, generate beep tones, control playback
+  </Card>
+  <Card title="Input" icon="keyboard" href="/api/input">
+    Read key states and simulate mouse/keyboard input
   </Card>
 </CardGroup>
 
 ## Quick example
 
 ```lua
--- Toggle ESP with F2, show a notification
+-- Toggle ESP with F2 and show a notification
 while true do
     if Input.IsKeyPressed(0x71) then
         local state = ESP.Toggle()

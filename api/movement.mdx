@@ -4,30 +4,34 @@ description: "Flight and noclip controls"
 icon: "person-running"
 ---
 
+The movement APIs give you control over flight and noclip — fly around the map or walk through walls.
+
+---
+
 ## Flight
 
-Enables free flight, overriding Roblox gravity and allowing movement in any direction.
+Enables free flight, letting you move in any direction and ignore gravity.
 
 <ResponseField name="Flight.Enable()" type="void">
-  Enable flight.
+  Turn on flight.
 </ResponseField>
 
 <ResponseField name="Flight.Disable()" type="void">
-  Disable flight.
+  Turn off flight.
 </ResponseField>
 
 <ResponseField name="Flight.Toggle()" type="boolean">
-  Toggle flight. Returns the new state.
+  Flip flight on or off. Returns the new state.
 </ResponseField>
 
 <ResponseField name="Flight.IsEnabled()" type="boolean">
-  Returns whether flight is enabled.
+  Check if flight is currently on.
 </ResponseField>
 
 <ResponseField name="Flight.SetSpeed(speed)" type="void">
-  Set flight speed.
+  Set how fast you fly.
   <ParamField path="speed" type="number" required>
-    The flight speed value.
+    Flight speed value — higher = faster.
   </ParamField>
 </ResponseField>
 
@@ -36,7 +40,7 @@ Enables free flight, overriding Roblox gravity and allowing movement in any dire
 </ResponseField>
 
 ```lua
--- Toggle flight with a keybind
+-- Toggle flight with F7
 while true do
     if Input.IsKeyPressed(0x76) then -- F7
         local on = Flight.Toggle()
@@ -55,30 +59,54 @@ end
 
 ## Noclip
 
-Walk through walls and terrain by disabling collision checks.
+Walk straight through walls, floors, and terrain by disabling collision.
 
 <ResponseField name="Noclip.Enable()" type="void">
-  Enable noclip.
+  Turn on noclip.
 </ResponseField>
 
 <ResponseField name="Noclip.Disable()" type="void">
-  Disable noclip.
+  Turn off noclip.
 </ResponseField>
 
 <ResponseField name="Noclip.Toggle()" type="boolean">
-  Toggle noclip. Returns the new state.
+  Flip noclip on or off. Returns the new state.
 </ResponseField>
 
 <ResponseField name="Noclip.IsEnabled()" type="boolean">
-  Returns whether noclip is enabled.
+  Check if noclip is currently on.
 </ResponseField>
 
 ```lua
--- Simple noclip toggle
+-- Toggle noclip with F8
 while true do
     if Input.IsKeyPressed(0x77) then -- F8
         local on = Noclip.Toggle()
         notify(on and "Noclip ON" or "Noclip OFF", "Movement", 2, on and 1 or 2)
+    end
+    wait(0.01)
+end
+```
+
+---
+
+## Combining Both
+
+Flight + noclip together lets you fly through walls — useful for exploring maps or getting to hard-to-reach spots.
+
+```lua
+-- F7 = flight, F8 = noclip, F9 = both
+while true do
+    if Input.IsKeyPressed(0x76) then -- F7
+        Flight.Toggle()
+    end
+    if Input.IsKeyPressed(0x77) then -- F8
+        Noclip.Toggle()
+    end
+    if Input.IsKeyPressed(0x78) then -- F9
+        local fly = Flight.Toggle()
+        if fly then Noclip.Enable() else Noclip.Disable() end
+        notify(fly and "Ghost mode ON" or "Ghost mode OFF", "Movement", 2, fly and 1 or 2)
     end
     wait(0.01)
 end

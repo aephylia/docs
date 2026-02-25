@@ -1,0 +1,112 @@
+---
+title: Memory
+description: "Raw memory read, write, and base address access"
+icon: "microchip"
+---
+
+The `Memory` library gives scripts direct access to read and write the target process's memory. You can grab the Roblox base address, read values at any offset, and write them back — all typed, so you always get the right size.
+
+<Warning>
+  **This is a low-level API.** Writing to the wrong address or using the wrong type can crash the game or cause undefined behavior. Double-check your offsets and types before committing anything to memory.
+</Warning>
+
+---
+
+## GetBase
+
+<ResponseField name="Memory.GetBase()" type="number">
+  Returns the base address of the Roblox module in memory. You'll use this as the starting point for all your offset calculations.
+
+  ```lua
+  local base = Memory.GetBase()
+  print("Base address: " .. base)
+  ```
+</ResponseField>
+
+---
+
+## Read
+
+<ResponseField name="Memory.Read(address, type)" type="number | boolean">
+  Reads a value from the given memory address. The `type` string tells the engine what size / format to read.
+
+  <ParamField path="address" type="number" required>The absolute memory address to read from</ParamField>
+  <ParamField path="type" type="string" default="int">
+    One of:
+    - `"byte"` — unsigned 8-bit integer
+    - `"int"` — signed 32-bit integer *(default)*
+    - `"float"` — 32-bit floating point
+    - `"double"` — 64-bit floating point
+    - `"int64"` / `"long"` — signed 64-bit integer
+    - `"pointer"` / `"ptr"` — pointer-sized unsigned integer (8 bytes on x64)
+    - `"bool"` — boolean (returns `true` / `false`)
+  </ParamField>
+
+  ```lua
+  local base = Memory.GetBase()
+
+  -- read a pointer at base + 0x1234
+  local ptr = Memory.Read(base + 0x1234, "pointer")
+
+  -- read a float from that pointer + 0x10
+  local health = Memory.Read(ptr + 0x10, "float")
+  print("Health: " .. health)
+  ```
+</ResponseField>
+
+---
+
+## Write
+
+<ResponseField name="Memory.Write(address, value, type)" type="void">
+  Writes a value to the given memory address. Same type system as `Read`.
+
+  <ParamField path="address" type="number" required>The absolute memory address to write to</ParamField>
+  <ParamField path="value" type="number | boolean" required>The value to write</ParamField>
+  <ParamField path="type" type="string" default="int">
+    One of:
+    - `"byte"` — unsigned 8-bit integer
+    - `"int"` — signed 32-bit integer *(default)*
+    - `"float"` — 32-bit floating point
+    - `"double"` — 64-bit floating point
+    - `"int64"` / `"long"` — signed 64-bit integer
+    - `"pointer"` / `"ptr"` — pointer-sized unsigned integer
+    - `"bool"` — boolean
+  </ParamField>
+
+  ```lua
+  local base = Memory.GetBase()
+
+  -- write a float value
+  Memory.Write(base + 0x5678, 100.0, "float")
+
+  -- write a boolean flag
+  Memory.Write(base + 0x9ABC, true, "bool")
+  ```
+</ResponseField>
+
+---
+
+## Quick Example
+
+A small script that reads a pointer chain and patches a value:
+
+```lua
+local base = Memory.GetBase()
+
+-- follow a pointer chain: base → ptr1 → ptr2 → target
+local ptr1   = Memory.Read(base + 0x1000, "pointer")
+local ptr2   = Memory.Read(ptr1 + 0x20, "pointer")
+local target = ptr2 + 0x48
+
+local currentVal = Memory.Read(target, "float")
+print("Current: " .. currentVal)
+
+-- patch it
+Memory.Write(target, 999.0, "float")
+print("Patched to 999!")
+```
+
+<Note>
+  All addresses are absolute (base + offset). The engine handles memory protection internally, so you don't need to call VirtualProtect yourself.
+</Note>

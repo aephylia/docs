@@ -1,37 +1,41 @@
 ---
 title: Security
-description: "Sandboxing and security model for Lua scripts"
+description: "How scripts are sandboxed and isolated"
 ---
+
+aephylia takes script security seriously. Here's what's in place to keep things safe.
 
 ## Removed globals
 
-The following Lua standard library functions are **stripped** after initialization and cannot be used in scripts:
+These Lua standard library functions are **completely removed** after initialization — you can't use them in scripts, period:
 
-| Function | Reason |
+| Function | Why it's gone |
 |---|---|
-| `os` | System access (execute commands, env vars, etc.) |
-| `io` | Unrestricted file I/O |
-| `package` | Module loading from arbitrary paths |
-| `debug` | Inspect/modify runtime internals |
-| `dofile` | Execute arbitrary files |
-| `loadfile` | Load arbitrary files as code |
-| `load` | Load arbitrary strings as bytecode |
-| `loadstring` | Load arbitrary strings as code |
+| `os` | Could execute system commands, read env vars, etc. |
+| `io` | Unrestricted file access to anywhere on disk |
+| `package` | Could load modules from arbitrary paths |
+| `debug` | Could inspect and modify runtime internals |
+| `dofile` | Could execute arbitrary files |
+| `loadfile` | Could load arbitrary files as code |
+| `load` | Could load arbitrary strings as bytecode |
+| `loadstring` | Could load arbitrary strings as code |
 
 ## File system sandboxing
 
-All file operations (`readfile`, `writefile`, etc.) are restricted to:
+Every file operation (`readfile`, `writefile`, `listfiles`, etc.) is locked to one directory:
 
 ```
 Documents\aephylia\workspace\
 ```
 
-Path traversal attempts (e.g. `../`) are blocked. Absolute paths are rejected.
+Any attempt to use `../` to escape or absolute paths with `:` in them gets blocked immediately. Your scripts can only touch files inside the workspace folder.
 
 ## Script isolation
 
-Each script runs in its own `lua_State` on a separate thread. Scripts cannot access each other's state or variables.
+Each script runs in its own `lua_State` on a separate thread. Scripts can't see each other's variables, can't call each other's functions, and can't interfere with each other in any way. If one script crashes, the others keep running.
 
 ## Abort mechanism
 
-The engine installs a debug hook that checks a stop flag every **100 Lua instructions**. When you click Stop, the script will halt within milliseconds regardless of what it's doing.
+When you click Stop, the engine doesn't just hope the script notices — it installs a debug hook that checks a stop flag every **100 Lua instructions**. No matter what your script is doing (even if it's stuck in a tight loop), it'll halt within milliseconds.
+
+The `wait()` function also checks the stop flag every 10ms, so even during long waits your script can be stopped cleanly.

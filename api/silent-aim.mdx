@@ -1,31 +1,35 @@
 ---
 title: Silent Aim & Combat
-description: "Silent aim, desync, and tickrate control"
+description: "Silent aim, desync, and tickrate manipulation"
 icon: "bullseye"
+---
+
+This page covers the combat-related APIs that go beyond the regular aimbot — silent aim, desync, and tickrate control.
+
 ---
 
 ## Silent Aim
 
-Silent aim modifies the viewport sent to the server so your shots hit the target without visibly aiming at them.
+Silent aim works differently from the regular aimbot. Instead of moving your mouse, it modifies the data sent to the server so your shots land on the target without visibly aiming at them. Your crosshair can be pointing anywhere — shots still hit.
 
 <ResponseField name="Silent.Enable()" type="void">
-  Enable silent aim.
+  Turn on silent aim.
 </ResponseField>
 
 <ResponseField name="Silent.Disable()" type="void">
-  Disable silent aim.
+  Turn off silent aim.
 </ResponseField>
 
 <ResponseField name="Silent.Toggle()" type="boolean">
-  Toggle silent aim. Returns the new state.
+  Flip silent aim on or off. Returns the new state.
 </ResponseField>
 
 <ResponseField name="Silent.IsEnabled()" type="boolean">
-  Returns whether silent aim is enabled.
+  Check if silent aim is on.
 </ResponseField>
 
 <ResponseField name="Silent.SetFOV(value)" type="void">
-  Set the silent aim FOV radius.
+  Set how far from your crosshair silent aim will look for targets.
   <ParamField path="value" type="number" required>
     FOV radius in pixels (e.g. `200`)
   </ParamField>
@@ -39,40 +43,40 @@ Silent aim modifies the viewport sent to the server so your shots hit the target
 
 ## Desync
 
-Desync desyncs your character's position on the server from what other players see, making you harder to hit.
+Desync makes your character's server-side position different from what other players see. In other words, where enemies shoot at isn't actually where your character is on the server — making you much harder to hit.
 
 <ResponseField name="Desync.Enable()" type="void">
-  Enable desync.
+  Turn on desync.
 </ResponseField>
 
 <ResponseField name="Desync.Disable()" type="void">
-  Disable desync.
+  Turn off desync.
 </ResponseField>
 
 <ResponseField name="Desync.Toggle()" type="boolean">
-  Toggle desync. Returns the new state.
+  Flip desync on or off. Returns the new state.
 </ResponseField>
 
 <ResponseField name="Desync.IsEnabled()" type="boolean">
-  Returns whether desync is enabled.
+  Check if desync is currently on.
 </ResponseField>
 
 ---
 
 ## Tickrate
 
-Override the game's physics simulation tick rate for faster movement and actions.
+The tickrate controls how often the game's physics simulation updates. Roblox normally runs at 60 ticks per second — cranking this up makes your character move and act faster than everyone else.
 
 <ResponseField name="Tickrate.Enable()" type="void">
-  Enable tickrate override.
+  Turn on tickrate override.
 </ResponseField>
 
 <ResponseField name="Tickrate.Disable()" type="void">
-  Disable tickrate override.
+  Turn off tickrate override (goes back to default).
 </ResponseField>
 
 <ResponseField name="Tickrate.Set(value)" type="void">
-  Set the tickrate value and enable it.
+  Set the tickrate value **and** enable it in one call.
   <ParamField path="value" type="number" required>
     Ticks per second (e.g. `240`). Default Roblox is `60`.
   </ParamField>
@@ -83,15 +87,36 @@ Override the game's physics simulation tick rate for faster movement and actions
 </ResponseField>
 
 <ResponseField name="Tickrate.IsEnabled()" type="boolean">
-  Returns whether tickrate override is enabled.
+  Check if tickrate override is active.
 </ResponseField>
 
+---
+
+## Full Example — Combat Setup
+
 ```lua
--- Enable combat setup
+-- Turn everything on
 Silent.Enable()
 Silent.SetFOV(200)
 Desync.Enable()
 Tickrate.Set(240)
 
 notify("Combat mode ON", "Script", 2, 1)
+
+-- Toggle everything with one key
+while true do
+    if Input.IsKeyPressed(0x75) then -- F6
+        local silent = Silent.Toggle()
+        if silent then
+            Desync.Enable()
+            Tickrate.Set(240)
+            notify("Combat ON", "Combat", 2, 1)
+        else
+            Desync.Disable()
+            Tickrate.Disable()
+            notify("Combat OFF", "Combat", 2, 2)
+        end
+    end
+    wait(0.01)
+end
 ```

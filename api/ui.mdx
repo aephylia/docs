@@ -1,9 +1,10 @@
 ---
 title: UI
-description: "Create custom menu tabs and interactive widgets from scripts"
+description: "Create custom menu tabs, containers, and interactive widgets"
+icon: "sliders"
 ---
 
-The `ui` library lets scripts add their own tabs, containers, and widgets to the aephylia menu. Widget values can be polled at any time with `ui.getValue()`.
+The `ui` library lets your scripts add their own tabs and widgets to the aephylia menu. You can create checkboxes, sliders, dropdowns, color pickers, and more — then read and write their values from your script. It's like building a mini settings panel for your script.
 
 ---
 
@@ -11,36 +12,40 @@ The `ui` library lets scripts add their own tabs, containers, and widgets to the
 
 ### `ui.newTab(tabRef, displayName)`
 
-Creates a new tab in the script UI section.
+Creates a new tab in the script UI section of the menu.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `tabRef` | string | Internal reference ID (unique) |
-| `displayName` | string | Text shown on the tab header |
+| `tabRef` | string | Internal ID — must be unique across all scripts |
+| `displayName` | string | The text shown on the tab header |
 
 ```lua
 ui.newTab("my_script", "My Script")
 ```
 
+<Note>
+  If a tab with the same `tabRef` already exists, this call is silently skipped. So it's safe to call on every script run.
+</Note>
+
 ### `ui.newContainer(tabRef, containerRef, displayName, options?)`
 
-Creates a container (group box) inside a tab.
+Creates a container (group box) inside a tab to organize your widgets.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `tabRef` | string | Tab reference to add container to |
-| `containerRef` | string | Internal reference ID for the container |
-| `displayName` | string | Header text for the container |
-| `options` | table? | Optional layout settings |
+| `tabRef` | string | Which tab to add this container to |
+| `containerRef` | string | Internal ID for the container |
+| `displayName` | string | Header text shown on the container |
+| `options` | table? | Optional layout settings (see below) |
 
-**Options table:**
+**Options:**
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `autosize` | bool | `false` | Auto-size height to content |
-| `next` | bool | `false` | Place next to previous container (side-by-side) |
-| `halfsize` | bool | `false` | Use 50% width |
-| `visible` | bool | `true` | Initial visibility |
+| `autosize` | boolean | `false` | Automatically size the container height to fit its contents |
+| `next` | boolean | `false` | Place this container next to the previous one (side-by-side) |
+| `halfsize` | boolean | `false` | Use 50% width instead of full width |
+| `visible` | boolean | `true` | Whether the container starts visible |
 
 ```lua
 ui.newContainer("my_script", "settings", "Settings", { autosize = true })
@@ -51,11 +56,11 @@ ui.newContainer("my_script", "visuals", "Visuals", { next = true, halfsize = tru
 
 ## Widgets
 
-All widget creation functions share the signature: `ui.newWidget(tabRef, containerRef, name, ...)`.
+All widget creation functions follow the same pattern: `ui.newWidget(tabRef, containerRef, name, ...)`.
 
 ### `ui.newCheckbox(tabRef, containerRef, name)`
 
-Creates a boolean checkbox. Default value: `false`.
+A simple on/off checkbox. Starts unchecked.
 
 ```lua
 ui.newCheckbox("my_script", "settings", "Enable ESP")
@@ -63,7 +68,7 @@ ui.newCheckbox("my_script", "settings", "Enable ESP")
 
 ### `ui.newSliderInt(tabRef, containerRef, name, min, max, default?)`
 
-Creates an integer slider.
+An integer slider with a range.
 
 ```lua
 ui.newSliderInt("my_script", "settings", "FOV", 50, 300, 150)
@@ -71,7 +76,7 @@ ui.newSliderInt("my_script", "settings", "FOV", 50, 300, 150)
 
 ### `ui.newSliderFloat(tabRef, containerRef, name, min, max, default?)`
 
-Creates a floating-point slider.
+A floating-point slider for more precise values.
 
 ```lua
 ui.newSliderFloat("my_script", "settings", "Smoothing", 0.1, 10.0, 3.0)
@@ -79,7 +84,7 @@ ui.newSliderFloat("my_script", "settings", "Smoothing", 0.1, 10.0, 3.0)
 
 ### `ui.newDropdown(tabRef, containerRef, name, options, default?)`
 
-Creates a single-select dropdown. `default` is a 1-based index.
+A single-select dropdown. `default` is a **1-based index** into the options list.
 
 ```lua
 ui.newDropdown("my_script", "settings", "Mode", {"Mouse", "Memory", "Camera"}, 1)
@@ -87,15 +92,15 @@ ui.newDropdown("my_script", "settings", "Mode", {"Mouse", "Memory", "Camera"}, 1
 
 ### `ui.newMultiselect(tabRef, containerRef, name, options)`
 
-Creates a multi-select dropdown where multiple options can be toggled.
+A multi-select dropdown where you can toggle multiple options on/off independently.
 
 ```lua
-ui.newMultiselect("my_script", "visuals", "Parts", {"Head", "Torso", "Arms", "Legs"})
+ui.newMultiselect("my_script", "visuals", "Show Parts", {"Head", "Torso", "Arms", "Legs"})
 ```
 
 ### `ui.newColorpicker(tabRef, containerRef, name, default?)`
 
-Creates an RGBA color picker. Default is a table `{r, g, b, a}` (0-255).
+An RGBA color picker. Pass the default as a table with `r`, `g`, `b`, `a` keys (0–255).
 
 ```lua
 ui.newColorpicker("my_script", "visuals", "Box Color", {r=255, g=0, b=0, a=255})
@@ -103,7 +108,7 @@ ui.newColorpicker("my_script", "visuals", "Box Color", {r=255, g=0, b=0, a=255})
 
 ### `ui.newInputText(tabRef, containerRef, name, default?)`
 
-Creates a text input field (max 256 chars).
+A text input field (max 256 characters).
 
 ```lua
 ui.newInputText("my_script", "settings", "Player Name", "")
@@ -111,15 +116,15 @@ ui.newInputText("my_script", "settings", "Player Name", "")
 
 ### `ui.newButton(tabRef, containerRef, name)`
 
-Creates a clickable button. Use `ui.getValue()` to check if it was clicked.
+A clickable button. Check if it was clicked using `ui.getValue` — it returns `true` once per click.
 
 ```lua
-ui.newButton("my_script", "settings", "Apply")
+ui.newButton("my_script", "settings", "Apply Settings")
 ```
 
 ### `ui.newListbox(tabRef, containerRef, name, options, default?)`
 
-Creates a listbox for single-item selection. `default` is a 1-based index.
+A scrollable listbox for selecting one item. `default` is a **1-based index**.
 
 ```lua
 ui.newListbox("my_script", "settings", "Target", {"Nearest", "Lowest HP", "Most Threat"}, 1)
@@ -127,23 +132,23 @@ ui.newListbox("my_script", "settings", "Target", {"Nearest", "Lowest HP", "Most 
 
 ---
 
-## Interaction
+## Reading & Writing Values
 
 ### `ui.getValue(tabRef, containerRef, name)` → value
 
-Returns the current value of a widget. Return type depends on widget type:
+Returns the current value of a widget. The return type depends on the widget:
 
-| Widget | Return type |
-|--------|------------|
-| Checkbox | `boolean` |
-| SliderInt | `integer` |
-| SliderFloat | `number` |
-| Dropdown | `integer` (1-based index) |
-| InputText | `string` |
-| Colorpicker | `table` `{r, g, b, a}` (0-255) |
-| Button | `boolean` (true if clicked since last check) |
-| Multiselect | `table` of booleans |
-| Listbox | `integer` (1-based index) |
+| Widget | Return Type | Example |
+|--------|------------|---------|
+| Checkbox | `boolean` | `true` |
+| Button | `boolean` | `true` (resets after read) |
+| SliderInt | `integer` | `150` |
+| SliderFloat | `number` | `3.5` |
+| Dropdown | `integer` | `2` (1-based index) |
+| Listbox | `integer` | `1` (1-based index) |
+| InputText | `string` | `"hello"` |
+| Colorpicker | `table` | `{r=255, g=0, b=0, a=255}` |
+| Multiselect | `table` | `{true, false, true, false}` |
 
 ```lua
 local enabled = ui.getValue("my_script", "settings", "Enable ESP")
@@ -152,7 +157,7 @@ local fov = ui.getValue("my_script", "settings", "FOV")
 
 ### `ui.setValue(tabRef, containerRef, name, value)`
 
-Sets the value of a widget programmatically.
+Sets a widget's value from your script.
 
 ```lua
 ui.setValue("my_script", "settings", "FOV", 200)
@@ -161,35 +166,42 @@ ui.setValue("my_script", "settings", "Enable ESP", true)
 
 ### `ui.setVisibility(tabRef, containerRef, name, visible)`
 
-Show or hide a widget.
+Show or hide a specific widget. Great for conditional settings that only make sense when something else is enabled.
 
 ```lua
+-- Only show FOV slider when ESP is enabled
 local enabled = ui.getValue("my_script", "settings", "Enable ESP")
 ui.setVisibility("my_script", "settings", "FOV", enabled)
 ```
 
 ---
 
-## Full example
+## Full Example
 
 ```lua
--- Create UI
+-- Build the UI
 ui.newTab("aimbot_cfg", "Aimbot Config")
 ui.newContainer("aimbot_cfg", "main", "Main Settings", { autosize = true })
+
 ui.newCheckbox("aimbot_cfg", "main", "Enabled")
 ui.newSliderInt("aimbot_cfg", "main", "FOV", 10, 500, 150)
 ui.newSliderFloat("aimbot_cfg", "main", "Smoothing", 0.1, 20.0, 5.0)
 ui.newDropdown("aimbot_cfg", "main", "Mode", {"Mouse", "Memory", "Camera"}, 1)
-ui.newColorpicker("aimbot_cfg", "main", "FOV Circle", {r=255, g=255, b=255, a=100})
+ui.newColorpicker("aimbot_cfg", "main", "FOV Circle Color", {r=255, g=255, b=255, a=100})
 
--- Use values in a loop
+notify("UI created!", "Script", 2, 1)
+
+-- Poll values and apply them
 while true do
     local enabled = ui.getValue("aimbot_cfg", "main", "Enabled")
     if enabled then
-        local fov = ui.getValue("aimbot_cfg", "main", "FOV")
-        local smooth = ui.getValue("aimbot_cfg", "main", "Smoothing")
-        -- Use values...
+        Aimbot.Enable()
+        Aimbot.SetFOV(ui.getValue("aimbot_cfg", "main", "FOV"))
+        Aimbot.SetSmoothing(ui.getValue("aimbot_cfg", "main", "Smoothing"))
+        Aimbot.SetMode(ui.getValue("aimbot_cfg", "main", "Mode") - 1) -- 1-based → 0-based
+    else
+        Aimbot.Disable()
     end
-    wait(0.01)
+    wait(0.05)
 end
 ```

@@ -4,22 +4,26 @@ description: "Control aimbot settings, FOV, smoothing, keybinds, and targeting"
 icon: "crosshairs"
 ---
 
+The `Aimbot` library gives you full control over the aimbot — FOV, smoothing, target selection, keybinds, prediction, easing curves, and more. Everything can be changed on the fly, so you can build dynamic configs that adapt to what's happening in-game.
+
+---
+
 ## Toggle
 
 <ResponseField name="Aimbot.Enable()" type="void">
-  Enable the aimbot.
+  Turn on the aimbot.
 </ResponseField>
 
 <ResponseField name="Aimbot.Disable()" type="void">
-  Disable the aimbot.
+  Turn off the aimbot.
 </ResponseField>
 
 <ResponseField name="Aimbot.Toggle()" type="boolean">
-  Toggle the aimbot on/off. Returns the new state.
+  Flip the aimbot on or off. Returns the new state.
 </ResponseField>
 
 <ResponseField name="Aimbot.IsEnabled()" type="boolean">
-  Returns whether the aimbot is currently enabled.
+  Check if the aimbot is currently active.
 </ResponseField>
 
 ```lua
@@ -29,12 +33,16 @@ if not Aimbot.IsEnabled() then
 end
 ```
 
+---
+
 ## FOV
 
+The FOV circle determines how close a target needs to be to your crosshair before the aimbot kicks in.
+
 <ResponseField name="Aimbot.SetFOV(value)" type="void">
-  Set the aimbot FOV circle radius in pixels.
+  Set the aimbot FOV radius in pixels.
   <ParamField path="value" type="number" required>
-    FOV radius (e.g. `150`)
+    FOV radius (e.g. `150`). Bigger = more aggressive.
   </ParamField>
 </ResponseField>
 
@@ -42,15 +50,19 @@ end
   Returns the current FOV radius.
 </ResponseField>
 
+---
+
 ## Smoothing
 
+Smoothing makes the aim movement gradual instead of snapping instantly. Higher values = slower, more natural-looking aim.
+
 <ResponseField name="Aimbot.SetSmoothing(x, y?)" type="void">
-  Set aim smoothing. Higher = slower, more human-like.
+  Set the aim smoothing factor. If you only pass one value, it's used for both axes.
   <ParamField path="x" type="number" required>
-    Horizontal smoothing factor
+    Horizontal smoothing (e.g. `5.0`)
   </ParamField>
   <ParamField path="y" type="number">
-    Vertical smoothing factor. Defaults to `x` if omitted.
+    Vertical smoothing. Defaults to `x` if you don't pass it.
   </ParamField>
 </ResponseField>
 
@@ -59,14 +71,17 @@ end
 </ResponseField>
 
 ```lua
+Aimbot.SetSmoothing(8) -- same smoothing for both axes
 local sx, sy = Aimbot.GetSmoothing()
-print("Smoothing: " .. sx .. ", " .. sy)
+print("Smoothing:", sx, sy)
 ```
+
+---
 
 ## Targeting
 
 <ResponseField name="Aimbot.SetTarget(index)" type="void">
-  Set which bone to aim at.
+  Choose which body part to aim at.
   <ParamField path="index" type="number" required>
     `0` = head, `1` = torso, etc.
   </ParamField>
@@ -76,16 +91,18 @@ print("Smoothing: " .. sx .. ", " .. sy)
   Returns the current target bone index.
 </ResponseField>
 
+---
+
 ## Mode
 
 <ResponseField name="Aimbot.SetMode(mode)" type="void">
-  Set the aimbot mode.
+  Set how the aimbot actually moves your aim.
   <ParamField path="mode" type="number" required>
-    | Value | Mode |
-    |---|---|
-    | `0` | Mouse (moves the mouse cursor) |
-    | `1` | Memory (writes aim directly) |
-    | `2` | Camera (writes camera angles) |
+    | Value | Mode | How it works |
+    |---|---|---|
+    | `0` | Mouse | Moves your mouse cursor |
+    | `1` | Memory | Writes aim angles directly to memory |
+    | `2` | Camera | Writes camera angles |
   </ParamField>
 </ResponseField>
 
@@ -93,34 +110,50 @@ print("Smoothing: " .. sx .. ", " .. sy)
   Returns the current aimbot mode.
 </ResponseField>
 
-## Team check
+---
+
+## Team Check
 
 <ResponseField name="Aimbot.SetTeamCheck(enabled)" type="void">
-  Enable or disable team checking (skip teammates).
+  When on, the aimbot won't target your teammates.
   <ParamField path="enabled" type="boolean" required />
 </ResponseField>
 
 <ResponseField name="Aimbot.GetTeamCheck()" type="boolean">
-  Returns whether team check is enabled.
+  Returns whether team check is on.
 </ResponseField>
+
+---
 
 ## Prediction
 
-<ResponseField name="Aimbot.SetPrediction(enabled, predX, predY)" type="void">
-  Configure velocity prediction for moving targets.
+Prediction compensates for target movement by leading your aim. Enable it and optionally set the multipliers for each axis.
+
+<ResponseField name="Aimbot.SetPrediction(enabled, predX?, predY?)" type="void">
+  Turn prediction on/off and optionally adjust the prediction multipliers.
   <ParamField path="enabled" type="boolean" required />
-  <ParamField path="predX" type="number" required>
-    Horizontal prediction multiplier
+  <ParamField path="predX" type="number">
+    Horizontal prediction multiplier. Only needed if you want to change the value.
   </ParamField>
-  <ParamField path="predY" type="number" required>
-    Vertical prediction multiplier
+  <ParamField path="predY" type="number">
+    Vertical prediction multiplier. Only needed if you want to change the value.
   </ParamField>
 </ResponseField>
+
+```lua
+-- Just enable prediction with current values
+Aimbot.SetPrediction(true)
+
+-- Enable and set custom multipliers
+Aimbot.SetPrediction(true, 0.15, 0.15)
+```
+
+---
 
 ## Easing
 
 <ResponseField name="Aimbot.SetEasingStyle(style)" type="void">
-  Set the easing curve for aim movement.
+  Set the easing curve for aim movement. This changes how the aim speed varies as it moves toward the target.
   <ParamField path="style" type="number" required>
     | Value | Style |
     |---|---|
@@ -138,14 +171,20 @@ print("Smoothing: " .. sx .. ", " .. sy)
   </ParamField>
 </ResponseField>
 
+<Tip>
+  `Linear` (0) is the most predictable. `Sine` (1) and `Cubic` (3) feel pretty natural. The wilder ones like `Bounce` and `Elastic` are more for fun than for actual aiming.
+</Tip>
+
+---
+
 ## Keybind
 
-<ResponseField name="Aimbot.SetKey(vkCode, mode)" type="void">
-  Set the activation keybind.
+<ResponseField name="Aimbot.SetKey(vkCode, mode?)" type="void">
+  Set the activation key and how it behaves.
   <ParamField path="vkCode" type="number" required>
-    Windows virtual key code (e.g. `0x02` for right mouse button)
+    [Windows virtual key code](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes) (e.g. `0x02` for right mouse button)
   </ParamField>
-  <ParamField path="mode" type="number" required>
+  <ParamField path="mode" type="number" default="0">
     | Value | Mode |
     |---|---|
     | `0` | Hold (active while key is held) |
@@ -154,21 +193,51 @@ print("Smoothing: " .. sx .. ", " .. sy)
   </ParamField>
 </ResponseField>
 
+---
+
 ## Hitbox Expander
 
-<ResponseField name="Aimbot.SetHitboxExpander(enabled, sX, sY, sZ)" type="void">
-  Scale target hitboxes to make them easier to hit.
+<ResponseField name="Aimbot.SetHitboxExpander(enabled, sX?, sY?, sZ?)" type="void">
+  Scale up target hitboxes so they're easier to hit.
   <ParamField path="enabled" type="boolean" required />
-  <ParamField path="sX" type="number" required>Width scale</ParamField>
-  <ParamField path="sY" type="number" required>Height scale</ParamField>
-  <ParamField path="sZ" type="number" required>Depth scale</ParamField>
+  <ParamField path="sX" type="number">Width scale</ParamField>
+  <ParamField path="sY" type="number">Height scale</ParamField>
+  <ParamField path="sZ" type="number">Depth scale</ParamField>
 </ResponseField>
+
+---
 
 ## Sensitivity
 
 <ResponseField name="Aimbot.SetSensitivity(value)" type="void">
-  Set the aim sensitivity multiplier.
+  Set the aim sensitivity multiplier. Lower values make the aimbot less aggressive.
   <ParamField path="value" type="number" required>
-    `1.0` = default, lower = less aggressive
+    `1.0` = default speed, `0.5` = half speed
   </ParamField>
 </ResponseField>
+
+---
+
+## Full Example — Adaptive Aimbot
+
+```lua
+Aimbot.Enable()
+Aimbot.SetMode(0)        -- mouse
+Aimbot.SetTarget(0)      -- head
+Aimbot.SetSmoothing(6)
+Aimbot.SetFOV(200)
+Aimbot.SetKey(0x02, 0)   -- right mouse, hold mode
+Aimbot.SetTeamCheck(true)
+Aimbot.SetEasingStyle(3) -- cubic
+Aimbot.SetPrediction(true, 0.12, 0.12)
+
+-- Dynamically adjust FOV based on closest enemy distance
+while true do
+    local closest = Player.GetClosest(true)
+    if closest then
+        local fov = math.max(50, 300 - closest.Distance * 2)
+        Aimbot.SetFOV(fov)
+    end
+    wait(0.05)
+end
+```

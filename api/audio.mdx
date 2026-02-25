@@ -1,9 +1,10 @@
 ---
 title: Audio
 description: "Play sounds, generate tones, and control audio playback"
+icon: "volume-high"
 ---
 
-The `audio` library provides basic sound playback using the Windows audio system.
+The `audio` library lets you play sounds from your scripts. You can load WAV files from the workspace, generate simple beep tones, or stop all audio at once.
 
 ---
 
@@ -11,40 +12,42 @@ The `audio` library provides basic sound playback using the Windows audio system
 
 ### `audio.playSound(wavData, loop?)`
 
-Plays a WAV file from raw binary data in memory. Use `FileSystem.ReadFile()` to load WAV files.
+Plays a WAV file from raw binary data loaded into memory. Use `readfile()` to load the WAV data from your workspace first.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `wavData` | string | — | Raw WAV file data (binary) |
-| `loop` | bool | `false` | Loop the sound continuously |
+| `wavData` | string | — | Raw WAV file data (binary string) |
+| `loop` | boolean | `false` | Whether to loop the sound continuously |
 
 ```lua
-local wav = FileSystem.ReadFile("alert.wav")
+local wav = readfile("alert.wav")
 audio.playSound(wav)
 
--- Loop a sound
-local bgm = FileSystem.ReadFile("music.wav")
+-- Loop background music
+local bgm = readfile("music.wav")
 audio.playSound(bgm, true)
 ```
 
 <Warning>
-  Only one WAV sound can play at a time via `playSound`. Starting a new sound stops the previous one.
+  Only one sound can play at a time through `playSound`. Starting a new sound stops the previous one.
 </Warning>
+
+---
 
 ### `audio.beep(frequency, durationMs)`
 
-Generates a simple sine-wave beep tone. Runs asynchronously — does not block the script.
+Generates a simple sine-wave beep tone. This runs asynchronously on a separate thread, so it won't block your script.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `frequency` | integer | Frequency in Hz (37–32767) |
-| `durationMs` | integer | Duration in milliseconds |
+| `frequency` | number | Frequency in Hz (37–32767) |
+| `durationMs` | number | How long to play in milliseconds |
 
 ```lua
--- Short alert beep
+-- Quick alert beep
 audio.beep(800, 200)
 
--- Musical sequence
+-- Little musical sequence
 audio.beep(523, 300) -- C
 wait(0.35)
 audio.beep(659, 300) -- E
@@ -52,9 +55,11 @@ wait(0.35)
 audio.beep(784, 300) -- G
 ```
 
+---
+
 ### `audio.stopAll()`
 
-Immediately stops all currently playing sounds.
+Immediately stops any sound currently playing.
 
 ```lua
 audio.stopAll()
@@ -62,16 +67,22 @@ audio.stopAll()
 
 ---
 
-## Example: Hit sound
+## Example — Alert Sound
 
 ```lua
-local hitSound = FileSystem.ReadFile("hit.wav")
+-- Play an alert when a new player gets close
+local alertSound = readfile("alert.wav")
+local alerted = {}
 
 while true do
     local players = Player.GetPlayers()
     for _, p in ipairs(players) do
-        if p.Health < p.MaxHealth and not p.IsTeammate then
-            audio.playSound(hitSound)
+        if p.IsAlive and not p.IsTeammate and p.Distance < 30 and not alerted[p.Name] then
+            audio.playSound(alertSound)
+            notify(p.Name .. " is close!", "Alert", 2, 3)
+            alerted[p.Name] = true
+        elseif p.Distance > 50 then
+            alerted[p.Name] = nil
         end
     end
     wait(0.1)

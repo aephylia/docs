@@ -53,6 +53,7 @@
         "api/player",
         "api/input",
         "api/game",
+        "api/cheat",
         "api/drawing",
         "api/draw",
         "api/utilities",
@@ -60,7 +61,8 @@
         "api/http",
         "api/raw-input",
         "api/ui",
-        "api/audio"
+        "api/audio",
+        "api/memory"
       ]
     },
     {

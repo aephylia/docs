@@ -1,28 +1,43 @@
 ---
 title: ESP
-description: "Control ESP rendering, colors, flags, and world visual settings"
+description: "Control ESP rendering, colors, flags, and world visuals"
 icon: "eye"
+---
+
+The `ESP` library controls everything about player visuals — boxes, names, health bars, skeletons, chams, tracers, and more. You can also add your own custom flags to individual players and tweak world rendering settings like FOV, fog, and exposure.
+
 ---
 
 ## Toggle
 
 <ResponseField name="ESP.Enable()" type="void">
-  Enable ESP rendering.
+  Turn on ESP.
 </ResponseField>
 
 <ResponseField name="ESP.Disable()" type="void">
-  Disable ESP rendering.
+  Turn off ESP.
 </ResponseField>
 
 <ResponseField name="ESP.Toggle()" type="boolean">
-  Toggle ESP on/off. Returns the new state.
+  Flip ESP on or off. Returns the new state so you can use it for notifications.
 </ResponseField>
 
 <ResponseField name="ESP.IsEnabled()" type="boolean">
-  Returns whether ESP is currently enabled.
+  Check if ESP is currently on.
 </ResponseField>
 
-## Display elements
+```lua
+if not ESP.IsEnabled() then
+    ESP.Enable()
+    notify("ESP turned on", "Script", 2, 1)
+end
+```
+
+---
+
+## Display Elements
+
+These control which visual elements show up for each player.
 
 <ResponseField name="ESP.SetBoxes(enabled)" type="void">
   Toggle bounding boxes around players.
@@ -40,150 +55,207 @@ icon: "eye"
 </ResponseField>
 
 <ResponseField name="ESP.SetDistance(enabled)" type="void">
-  Toggle distance labels.
+  Toggle distance labels (shows how far away each player is in studs).
   <ParamField path="enabled" type="boolean" required />
 </ResponseField>
 
 <ResponseField name="ESP.SetSkeleton(enabled)" type="void">
-  Toggle skeleton rendering.
+  Toggle skeleton rendering (draws lines between bones).
   <ParamField path="enabled" type="boolean" required />
 </ResponseField>
 
 <ResponseField name="ESP.SetFlags(enabled)" type="void">
-  Toggle custom flag rendering.
+  Toggle the custom flags display. If you've added custom flags with `ESP.SetFlag()`, this controls whether they're visible.
   <ParamField path="enabled" type="boolean" required />
 </ResponseField>
+
+---
 
 ## Styles
 
 <ResponseField name="ESP.SetBoxStyle(style)" type="void">
-  Set the box rendering style.
+  Change how the boxes look.
   <ParamField path="style" type="number" required>
-    `0` = corners, `1` = full, etc.
+    `0` = corner brackets, `1` = full box outline
   </ParamField>
 </ResponseField>
 
 <ResponseField name="ESP.SetBoxFill(enabled)" type="void">
-  Toggle filled box backgrounds.
+  Toggle filled/transparent box backgrounds.
   <ParamField path="enabled" type="boolean" required />
 </ResponseField>
 
 <ResponseField name="ESP.SetChams(enabled)" type="void">
-  Toggle chams (colored player models).
+  Toggle chams (colored player models that show through walls).
   <ParamField path="enabled" type="boolean" required />
 </ResponseField>
+
+---
 
 ## Tracers
 
-<ResponseField name="ESP.SetTracers(enabled, mode)" type="void">
-  Toggle tracer lines to players.
+<ResponseField name="ESP.SetTracers(enabled, mode?)" type="void">
+  Toggle tracer lines from your screen to each player's position.
   <ParamField path="enabled" type="boolean" required />
-  <ParamField path="mode" type="number" required>
-    `0` = bottom, `1` = center, `2` = top
+  <ParamField path="mode" type="number">
+    Where the tracer starts from on your screen: `0` = bottom, `1` = center, `2` = top
   </ParamField>
 </ResponseField>
 
-## Render distance
+---
+
+## Render Distance
 
 <ResponseField name="ESP.SetRenderDistance(distance)" type="void">
-  Set the maximum distance at which ESP elements render.
+  Set how far away players can be before ESP stops drawing them. Useful to reduce clutter.
   <ParamField path="distance" type="number" required>
-    Distance in studs (e.g. `500`)
+    Max distance in studs (e.g. `500`)
   </ParamField>
 </ResponseField>
+
+---
 
 ## Colors
 
-<ResponseField name="ESP.SetColor(type, r, g, b)" type="void">
-  Set colors for specific ESP elements.
+<ResponseField name="ESP.SetColor(type, r, g, b, a?)" type="void">
+  Set colors for different ESP elements.
+
   <ParamField path="type" type="string" required>
-    `"enemy"`, `"skeleton"`, or `"name"`
+    Which element to color: `"enemy"` (boxes), `"skeleton"`, or `"name"`
   </ParamField>
   <ParamField path="r" type="number" required>Red (0–255)</ParamField>
   <ParamField path="g" type="number" required>Green (0–255)</ParamField>
   <ParamField path="b" type="number" required>Blue (0–255)</ParamField>
+  <ParamField path="a" type="number" default="255">Alpha (0–255)</ParamField>
 </ResponseField>
 
 ```lua
-ESP.SetColor("enemy", 255, 50, 50)    -- red boxes
-ESP.SetColor("skeleton", 255, 255, 0) -- yellow skeleton
-ESP.SetColor("name", 255, 255, 255)   -- white names
+ESP.SetColor("enemy", 255, 50, 50)       -- red boxes
+ESP.SetColor("skeleton", 255, 255, 0)    -- yellow skeleton
+ESP.SetColor("name", 255, 255, 255)      -- white names
+ESP.SetColor("enemy", 255, 50, 50, 180)  -- semi-transparent red boxes
 ```
 
-## Team check
+---
+
+## Team Check
 
 <ResponseField name="ESP.SetTeamCheck(enabled)" type="void">
-  Enable or disable team checking (hide teammates from ESP).
+  When enabled, teammates are hidden from ESP. Turn this off if you want to see everyone.
   <ParamField path="enabled" type="boolean" required />
 </ResponseField>
 
-## Advanced features
+---
+
+## Advanced Features
 
 <ResponseField name="ESP.SetOffscreenESP(enabled)" type="void">
-  Show indicators for off-screen players.
+  Shows little arrow indicators on the edge of your screen pointing toward off-screen players.
   <ParamField path="enabled" type="boolean" required />
 </ResponseField>
 
 <ResponseField name="ESP.SetLockedHighlight(enabled)" type="void">
-  Highlight the player currently locked by aimbot.
+  Adds a highlight effect on whichever player the aimbot is currently locked onto.
   <ParamField path="enabled" type="boolean" required />
 </ResponseField>
 
-## World rendering
+---
 
-<ResponseField name="ESP.SetWorldFOV(enabled, value)" type="void">
-  Override the camera field of view.
+## World Rendering
+
+These let you override some of the game's rendering settings.
+
+<ResponseField name="ESP.SetWorldFOV(enabled, value?)" type="void">
+  Override the camera's field of view. Crank it up for a wider view, or bring it down for a zoomed-in feel.
   <ParamField path="enabled" type="boolean" required />
-  <ParamField path="value" type="number" required>FOV in degrees (e.g. `90`)</ParamField>
+  <ParamField path="value" type="number">FOV in degrees (e.g. `90`, `120`)</ParamField>
 </ResponseField>
 
-<ResponseField name="ESP.SetFog(enabled, start, end)" type="void">
-  Override fog settings.
+<ResponseField name="ESP.SetFog(enabled, start?, end?)" type="void">
+  Override the game's fog settings. Push the fog way out to see clearly at long range, or bring it in for atmosphere.
   <ParamField path="enabled" type="boolean" required />
-  <ParamField path="start" type="number" required>Fog start distance</ParamField>
-  <ParamField path="end" type="number" required>Fog end distance</ParamField>
+  <ParamField path="start" type="number">Fog start distance</ParamField>
+  <ParamField path="end" type="number">Fog end distance</ParamField>
 </ResponseField>
 
-<ResponseField name="ESP.SetExposure(enabled, value)" type="void">
-  Override exposure/brightness.
+<ResponseField name="ESP.SetExposure(enabled, value?)" type="void">
+  Override the game's exposure/brightness. Useful for dark maps.
   <ParamField path="enabled" type="boolean" required />
-  <ParamField path="value" type="number" required>Exposure value (e.g. `0.5`)</ParamField>
+  <ParamField path="value" type="number">Exposure value (e.g. `0.5`)</ParamField>
 </ResponseField>
 
-## Custom flags
+---
 
-Add custom text flags that appear next to player names in ESP.
+## Custom Flags
 
-<ResponseField name="ESP.SetFlag(playerName, flagText, r, g, b)" type="void">
-  Add a custom flag to a player.
-  <ParamField path="playerName" type="string" required>Player's username</ParamField>
-  <ParamField path="flagText" type="string" required>Flag text to display</ParamField>
+You can stick custom text labels on specific players that show up next to their name in ESP. Great for marking threats, callouts, or anything else.
+
+<ResponseField name="ESP.SetFlag(playerName, flagText, r, g, b, a?)" type="void">
+  Adds a custom flag to a player. If a flag with the same text already exists on that player, it gets replaced.
+
+  <ParamField path="playerName" type="string" required>The player's username</ParamField>
+  <ParamField path="flagText" type="string" required>The text to display</ParamField>
   <ParamField path="r" type="number" required>Red (0–255)</ParamField>
   <ParamField path="g" type="number" required>Green (0–255)</ParamField>
   <ParamField path="b" type="number" required>Blue (0–255)</ParamField>
+  <ParamField path="a" type="number" default="255">Alpha (0–255)</ParamField>
 </ResponseField>
 
 <ResponseField name="ESP.RemoveFlag(playerName, flagText)" type="void">
-  Remove a specific flag from a player.
+  Removes a specific flag from a player.
+
+  <ParamField path="playerName" type="string" required>The player's username</ParamField>
+  <ParamField path="flagText" type="string" required>The flag text to remove</ParamField>
 </ResponseField>
 
 <ResponseField name="ESP.ClearFlags(playerName)" type="void">
-  Remove all flags from a specific player.
+  Removes all custom flags from a specific player.
+
+  <ParamField path="playerName" type="string" required>The player's username</ParamField>
 </ResponseField>
 
 <ResponseField name="ESP.ClearAllFlags()" type="void">
-  Remove all custom flags from all players.
+  Nukes all custom flags from every player at once.
 </ResponseField>
 
 ```lua
 -- Mark a suspicious player
-ESP.SetFlag("PlayerName", "SUS", 255, 165, 0)
+ESP.SetFlag("SomePlayer", "SUS", 255, 165, 0)
 
--- Mark high-value targets
+-- Auto-flag players based on health
 local players = Player.GetPlayers()
 for _, p in ipairs(players) do
-    if p.Health > 90 then
+    if p.IsAlive and p.Health > 90 then
         ESP.SetFlag(p.Name, "FULL HP", 0, 255, 0)
     end
+    if p.IsAlive and p.Health < 20 then
+        ESP.SetFlag(p.Name, "LOW HP", 255, 50, 50)
+    end
 end
+```
+
+---
+
+## Full Example — Combat ESP Setup
+
+```lua
+-- Set up a nice ESP config
+ESP.Enable()
+ESP.SetBoxes(true)
+ESP.SetBoxStyle(0)           -- corner brackets
+ESP.SetNames(true)
+ESP.SetHealth(true)
+ESP.SetDistance(true)
+ESP.SetSkeleton(true)
+ESP.SetTracers(true, 0)     -- tracers from bottom of screen
+ESP.SetTeamCheck(true)       -- hide teammates
+ESP.SetRenderDistance(500)
+ESP.SetOffscreenESP(true)
+
+-- Custom colors
+ESP.SetColor("enemy", 255, 80, 80)
+ESP.SetColor("skeleton", 255, 255, 100)
+ESP.SetColor("name", 255, 255, 255)
+
+notify("ESP configured!", "Setup", 2, 1)
 ```

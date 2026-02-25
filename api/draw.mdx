@@ -4,20 +4,20 @@ description: "Frame-by-frame immediate-mode drawing"
 icon: "paintbrush"
 ---
 
-The `Draw` library provides immediate-mode rendering. Commands are **auto-cleared each frame** — call them inside a loop with `wait()` to persist visuals.
+The `Draw` library is your go-to for quick, frame-by-frame rendering. Everything you draw gets **wiped at the end of each frame**, so you need to call these inside a loop (or an `onPaint` callback via [`cheat.run()`](/api/cheat)) to keep things on screen.
 
 <Note>
-  For persistent drawing objects that stay on screen, use the [Drawing (OOP)](/api/drawing) API instead.
+  If you want objects that stick around without redrawing them every frame, check out the [Drawing (OOP)](/api/drawing) API instead.
 </Note>
 
-All color values are **0–255**. Default color is white (`255, 255, 255, 255`).
+All colors use **0–255** range. If you don't pass color values, everything defaults to white (`255, 255, 255, 255`).
 
 ---
 
 ## Text
 
 <ResponseField name="Draw.Text(x, y, text, r, g, b, a, outline)" type="void">
-  Draws text at the given screen position.
+  Draws a string of text at the given screen position. The `outline` flag adds a dark border around each character — super useful for readability on busy backgrounds.
 
   <ParamField path="x" type="number" required>Screen X</ParamField>
   <ParamField path="y" type="number" required>Screen Y</ParamField>
@@ -26,10 +26,33 @@ All color values are **0–255**. Default color is white (`255, 255, 255, 255`).
   <ParamField path="g" type="number" default="255">Green (0–255)</ParamField>
   <ParamField path="b" type="number" default="255">Blue (0–255)</ParamField>
   <ParamField path="a" type="number" default="255">Alpha (0–255)</ParamField>
-  <ParamField path="outline" type="boolean" default="false">Draw black outline behind text</ParamField>
+  <ParamField path="outline" type="boolean" default="false">Draw a dark outline behind the text</ParamField>
 
   ```lua
   Draw.Text(100, 100, "Hello!", 255, 255, 0, 255, true)
+  ```
+</ResponseField>
+
+<ResponseField name="Draw.OutlineText(x, y, text, r, g, b)" type="void">
+  A shorthand for drawing outlined text without needing to pass alpha. Handy when you always want outlined text and don't feel like typing out all those params.
+
+  <ParamField path="x" type="number" required>Screen X</ParamField>
+  <ParamField path="y" type="number" required>Screen Y</ParamField>
+  <ParamField path="text" type="string" required>Text to draw</ParamField>
+  <ParamField path="r" type="number" required>Red (0–255)</ParamField>
+  <ParamField path="g" type="number" required>Green (0–255)</ParamField>
+  <ParamField path="b" type="number" required>Blue (0–255)</ParamField>
+</ResponseField>
+
+<ResponseField name="Draw.GetTextSize(text)" type="number, number">
+  Returns the pixel width and height a string of text would take up on screen. Really useful for centering text or building dynamic layouts.
+
+  <ParamField path="text" type="string" required>The text to measure</ParamField>
+
+  ```lua
+  local w, h = Draw.GetTextSize("Hello!")
+  local screenW = Game.GetScreenSize().Width
+  Draw.Text((screenW - w) / 2, 10, "Hello!", 255, 255, 255) -- centered
   ```
 </ResponseField>
 
@@ -38,7 +61,7 @@ All color values are **0–255**. Default color is white (`255, 255, 255, 255`).
 ## Lines
 
 <ResponseField name="Draw.Line(x1, y1, x2, y2, r, g, b, a, thickness)" type="void">
-  Draws a line between two screen points.
+  Draws a straight line between two screen points.
 
   <ParamField path="x1" type="number" required>Start X</ParamField>
   <ParamField path="y1" type="number" required>Start Y</ParamField>
@@ -48,10 +71,27 @@ All color values are **0–255**. Default color is white (`255, 255, 255, 255`).
   <ParamField path="g" type="number" default="255">Green</ParamField>
   <ParamField path="b" type="number" default="255">Blue</ParamField>
   <ParamField path="a" type="number" default="255">Alpha</ParamField>
-  <ParamField path="thickness" type="number" default="1">Line thickness</ParamField>
+  <ParamField path="thickness" type="number" default="1">Line thickness in pixels</ParamField>
 
   ```lua
   Draw.Line(0, 0, 500, 500, 255, 0, 0, 255, 2)
+  ```
+</ResponseField>
+
+<ResponseField name="Draw.Polyline(points, r, g, b, thickness)" type="void">
+  Draws a connected series of line segments through a list of points — like connect-the-dots. Great for paths, trails, or custom shapes.
+
+  <ParamField path="points" type="table" required>Array of `{x, y}` tables</ParamField>
+  <ParamField path="r" type="number" required>Red (0–255)</ParamField>
+  <ParamField path="g" type="number" required>Green (0–255)</ParamField>
+  <ParamField path="b" type="number" required>Blue (0–255)</ParamField>
+  <ParamField path="thickness" type="number" default="1">Line thickness</ParamField>
+
+  ```lua
+  local points = {
+      {100, 100}, {200, 50}, {300, 100}, {250, 200}, {150, 200}
+  }
+  Draw.Polyline(points, 0, 255, 255, 2)
   ```
 </ResponseField>
 
@@ -74,7 +114,7 @@ All color values are **0–255**. Default color is white (`255, 255, 255, 255`).
 </ResponseField>
 
 <ResponseField name="Draw.BoxFilled(x, y, w, h, r, g, b, a)" type="void">
-  Draws a **filled** rectangle.
+  Draws a **filled** rectangle. Perfect for backgrounds, health bars, or UI panels.
 
   <ParamField path="x" type="number" required>Top-left X</ParamField>
   <ParamField path="y" type="number" required>Top-left Y</ParamField>
@@ -86,9 +126,35 @@ All color values are **0–255**. Default color is white (`255, 255, 255, 255`).
   <ParamField path="a" type="number" default="255">Alpha</ParamField>
 
   ```lua
-  -- Semi-transparent background
+  -- Semi-transparent background with text on top
   Draw.BoxFilled(100, 100, 200, 50, 0, 0, 0, 128)
   Draw.Text(110, 115, "Overlay Text", 255, 255, 255)
+  ```
+</ResponseField>
+
+<ResponseField name="Draw.GradientRect(x, y, w, h, isHorizontal, color1, color2)" type="void">
+  Draws a rectangle with a smooth gradient between two colors. You choose horizontal (left→right) or vertical (top→bottom).
+
+  <ParamField path="x" type="number" required>Top-left X</ParamField>
+  <ParamField path="y" type="number" required>Top-left Y</ParamField>
+  <ParamField path="w" type="number" required>Width</ParamField>
+  <ParamField path="h" type="number" required>Height</ParamField>
+  <ParamField path="isHorizontal" type="boolean" required>`true` for left→right, `false` for top→bottom</ParamField>
+  <ParamField path="color1" type="table" required>Start color `{r, g, b, a}` (0–255)</ParamField>
+  <ParamField path="color2" type="table" required>End color `{r, g, b, a}` (0–255)</ParamField>
+
+  ```lua
+  -- Horizontal gradient from red to blue
+  Draw.GradientRect(50, 50, 300, 30, true,
+      {255, 0, 0, 255},
+      {0, 0, 255, 255}
+  )
+
+  -- Vertical fade-out (white to transparent)
+  Draw.GradientRect(50, 100, 300, 50, false,
+      {255, 255, 255, 255},
+      {255, 255, 255, 0}
+  )
   ```
 </ResponseField>
 
@@ -101,7 +167,7 @@ All color values are **0–255**. Default color is white (`255, 255, 255, 255`).
 
   <ParamField path="x" type="number" required>Center X</ParamField>
   <ParamField path="y" type="number" required>Center Y</ParamField>
-  <ParamField path="radius" type="number" required>Radius</ParamField>
+  <ParamField path="radius" type="number" required>Radius in pixels</ParamField>
   <ParamField path="r" type="number" default="255">Red</ParamField>
   <ParamField path="g" type="number" default="255">Green</ParamField>
   <ParamField path="b" type="number" default="255">Blue</ParamField>
@@ -114,7 +180,7 @@ All color values are **0–255**. Default color is white (`255, 255, 255, 255`).
 
   <ParamField path="x" type="number" required>Center X</ParamField>
   <ParamField path="y" type="number" required>Center Y</ParamField>
-  <ParamField path="radius" type="number" required>Radius</ParamField>
+  <ParamField path="radius" type="number" required>Radius in pixels</ParamField>
   <ParamField path="r" type="number" default="255">Red</ParamField>
   <ParamField path="g" type="number" default="255">Green</ParamField>
   <ParamField path="b" type="number" default="255">Blue</ParamField>
@@ -126,7 +192,7 @@ All color values are **0–255**. Default color is white (`255, 255, 255, 255`).
 ## Triangles
 
 <ResponseField name="Draw.Triangle(x1, y1, x2, y2, x3, y3, r, g, b, a, thickness)" type="void">
-  Draws a triangle outline from three vertices.
+  Draws a triangle **outline** from three vertices.
 
   <ParamField path="x1" type="number" required>Vertex 1 X</ParamField>
   <ParamField path="y1" type="number" required>Vertex 1 Y</ParamField>
@@ -141,12 +207,65 @@ All color values are **0–255**. Default color is white (`255, 255, 255, 255`).
   <ParamField path="thickness" type="number" default="1">Line thickness</ParamField>
 </ResponseField>
 
+<ResponseField name="Draw.TriangleFilled(x1, y1, x2, y2, x3, y3, r, g, b, a)" type="void">
+  Draws a **filled** triangle.
+
+  <ParamField path="x1" type="number" required>Vertex 1 X</ParamField>
+  <ParamField path="y1" type="number" required>Vertex 1 Y</ParamField>
+  <ParamField path="x2" type="number" required>Vertex 2 X</ParamField>
+  <ParamField path="y2" type="number" required>Vertex 2 Y</ParamField>
+  <ParamField path="x3" type="number" required>Vertex 3 X</ParamField>
+  <ParamField path="y3" type="number" required>Vertex 3 Y</ParamField>
+  <ParamField path="r" type="number" default="255">Red</ParamField>
+  <ParamField path="g" type="number" default="255">Green</ParamField>
+  <ParamField path="b" type="number" default="255">Blue</ParamField>
+  <ParamField path="a" type="number" default="255">Alpha</ParamField>
+</ResponseField>
+
 ---
 
-## Clear
+## Polygons
+
+<ResponseField name="Draw.FilledPoly(points, r, g, b)" type="void">
+  Draws a filled convex polygon from a list of points. Make sure your points form a **convex** shape (no inward dents), otherwise the result might look a bit funky.
+
+  <ParamField path="points" type="table" required>Array of `{x, y}` tables</ParamField>
+  <ParamField path="r" type="number" required>Red (0–255)</ParamField>
+  <ParamField path="g" type="number" required>Green (0–255)</ParamField>
+  <ParamField path="b" type="number" required>Blue (0–255)</ParamField>
+
+  ```lua
+  -- Draw a filled pentagon
+  local points = {
+      {200, 100}, {280, 160}, {250, 250}, {150, 250}, {120, 160}
+  }
+  Draw.FilledPoly(points, 128, 0, 255)
+  ```
+</ResponseField>
+
+---
+
+## Textures
+
+<ResponseField name="Draw.Texture(textureId, position, size, color)" type="void">
+  Draws a loaded texture at the given position with a color tint.
+
+  <ParamField path="textureId" type="number" required>ID of the loaded texture</ParamField>
+  <ParamField path="position" type="table" required>Screen position `{x, y}`</ParamField>
+  <ParamField path="size" type="table" required>Draw size `{w, h}`</ParamField>
+  <ParamField path="color" type="table" required>Tint color `{r, g, b, a}` (0–255)</ParamField>
+</ResponseField>
+
+---
+
+## Buffer Control
 
 <ResponseField name="Draw.Clear()" type="void">
-  Swaps the back draw buffer to the front and clears the back buffer. This is done automatically each frame, but you can call it manually to clear mid-frame.
+  Swaps the back draw buffer to the front and clears it for the next frame. This happens automatically each frame, but you can call it manually if you need to flush mid-frame.
+
+  <Tip>
+    If you're using [`cheat.run()`](/api/cheat) with an `onPaint` callback, the buffer swap is handled for you automatically — no need to call this yourself.
+  </Tip>
 </ResponseField>
 
 ---
@@ -160,7 +279,7 @@ while true do
     -- Background bar
     Draw.BoxFilled(10, 10, 200, 30, 0, 0, 0, 180)
 
-    -- Health text
+    -- Position text
     local pos = Player.GetLocalPosition()
     Draw.Text(15, 15, string.format("Pos: %.0f, %.0f, %.0f", pos.X, pos.Y, pos.Z), 0, 255, 0, 255, true)
 

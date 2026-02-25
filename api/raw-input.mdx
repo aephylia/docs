@@ -4,10 +4,10 @@ description: "Simulate mouse and keyboard input"
 icon: "computer-mouse"
 ---
 
-These functions **simulate** physical input events. For **reading** key states, see the [Input](/api/input) module.
+These functions let you **simulate** real OS-level input events — move the mouse, click buttons, press keys. For **reading** key states instead, see the [Input](/api/input) library.
 
 <Warning>
-  Simulated input sends real OS-level events. Use responsibly — rapid input may trigger anti-cheat detection in some games.
+  These send real input events through the operating system. Rapid or unnatural input patterns may trigger anti-cheat detection in some games, so use wisely.
 </Warning>
 
 ---
@@ -15,25 +15,25 @@ These functions **simulate** physical input events. For **reading** key states, 
 ## Mouse Movement
 
 <ResponseField name="mousemoverel(x, y)" type="void">
-  Moves the mouse cursor by a **relative** offset in pixels.
+  Moves the mouse by a **relative** offset in pixels from where it currently is.
 
   <ParamField path="x" type="number" required>Horizontal offset (positive = right)</ParamField>
   <ParamField path="y" type="number" required>Vertical offset (positive = down)</ParamField>
 
   ```lua
-  mousemoverel(10, -5) -- move right 10px, up 5px
+  mousemoverel(10, -5) -- right 10px, up 5px
   ```
 </ResponseField>
 
 <ResponseField name="mousemoveabs(x, y)" type="void">
-  Moves the mouse cursor to an **absolute** screen position.
+  Moves the mouse to an **absolute** screen position.
 
   <ParamField path="x" type="number" required>Screen X coordinate</ParamField>
   <ParamField path="y" type="number" required>Screen Y coordinate</ParamField>
 
   ```lua
   local size = Game.GetScreenSize()
-  mousemoveabs(size.Width / 2, size.Height / 2) -- move to center
+  mousemoveabs(size.Width / 2, size.Height / 2) -- move to center of screen
   ```
 </ResponseField>
 
@@ -41,8 +41,8 @@ These functions **simulate** physical input events. For **reading** key states, 
 
 ## Mouse Clicks
 
-<ResponseField name="mouseclick(button)" type="void">
-  Simulates a mouse button press and release.
+<ResponseField name="mouseclick(button?)" type="void">
+  Simulates a mouse button click (press + release).
 
   <ParamField path="button" type="number" default="0">
     - `0` — Left click
@@ -62,10 +62,10 @@ These functions **simulate** physical input events. For **reading** key states, 
 ## Mouse Scroll
 
 <ResponseField name="mousescroll(amount)" type="void">
-  Simulates a mouse scroll event.
+  Simulates scrolling the mouse wheel.
 
   <ParamField path="amount" type="number" required>
-    Scroll amount. Positive = scroll up, negative = scroll down.
+    Positive = scroll up, negative = scroll down.
   </ParamField>
 
   ```lua
@@ -79,14 +79,33 @@ These functions **simulate** physical input events. For **reading** key states, 
 ## Keyboard
 
 <ResponseField name="keypress(keycode)" type="void">
-  Simulates a key press and release using [Virtual Key Codes](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes).
+  Simulates pressing and releasing a key.
 
-  <ParamField path="keycode" type="number" required>Virtual key code</ParamField>
+  <ParamField path="keycode" type="number" required>
+    [Virtual Key Code](https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes)
+  </ParamField>
 
   ```lua
   keypress(0x57)  -- press 'W'
   keypress(0x20)  -- press Space
   keypress(0x0D)  -- press Enter
+  ```
+</ResponseField>
+
+---
+
+## Window Focus
+
+<ResponseField name="isrbxactive()" type="boolean">
+  Returns `true` if a Roblox window is currently the foreground window. Useful for making sure you only send input when the game is actually focused.
+
+  ```lua
+  while true do
+      if isrbxactive() then
+          -- only do stuff when Roblox is focused
+      end
+      wait(0.01)
+  end
   ```
 </ResponseField>
 
@@ -101,18 +120,4 @@ These functions **simulate** physical input events. For **reading** key states, 
 | Space | `0x20` | Shift | `0x10` |
 | Enter | `0x0D` | Escape | `0x1B` |
 | Tab | `0x09` | Ctrl | `0x11` |
-| 0-9 | `0x30`–`0x39` | F1-F12 | `0x70`–`0x7B` |
-
----
-
-## Example — Auto-Jump
-
-```lua
--- Simple bunny hop: press space when grounded
-while true do
-    if isrbxactive() and Input.IsKeyDown(0x20) then
-        keypress(0x20)
-    end
-    wait(0.005)
-end
-```
+| 0–9 | `0x30`–`0x39` | F1–F12 | `0x70`–`0x7B` |
